@@ -102,10 +102,6 @@ Stage1.prototype = {
 		door.anchor.setTo(0.5, 0.5);
 		door.frame = 0; // Closed door frame
 		doorCheck = false; //Haven't seen the door yet
-		
-		weight =  game.add.sprite(80, game.world.height - 500, 'diamond'); // Add weight
-		game.physics.arcade.enable(weight); // Apply physics on weight?
-	    weight.body.collideWorldBounds = true;
 
 	    //PLAYER STUFF
 		makePlayer();
@@ -124,7 +120,6 @@ Stage1.prototype = {
 
 	update: function() {
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
-		var hitPlatform3 = game.physics.arcade.collide(weight, platforms); // Apply colliding physics between weight and platforms
 		
 	   	playerMovement();
 	    
@@ -145,17 +140,6 @@ Stage1.prototype = {
 				unlock.play();
 			}
 	    }
-		
-		//THROWING THE "WEIGHT"
-		if (checkOverlap(player, weight)) // When player overlaps weight
-	    {
-			// Source: https://phaser.io/examples/v2/input/follow-mouse
-			if (game.input.mousePointer.isDown) // When mouse is pressed down
-			{
-	        //  400 is the speed it will move towards the mouse
-	        game.physics.arcade.moveToPointer(weight, 400); // Weight follows where the mouse cursor is located
-			}
-		}
 
 		//WIN CONDITIONS
 		if(checkOverlap(player, door) && door.frame == 1) 
