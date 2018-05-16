@@ -78,24 +78,28 @@ Stage1.prototype = {
 	    platforms = game.add.group(); // The platforms group contains the ground and the 2 ledges we can jump on
 	    platforms.enableBody = true; // We will enable physics for any object that is created in this group
 		
-	    ledge = platforms.create(0, game.world.height - 64, 'ground'); // Here we create the ground.
-	    ledge.scale.setTo(2, 2); // Scale it to fit the width of the game (the original sprite is 400x32 in size)
+	    ledge = platforms.create(0, 450, 'ground'); // Here we create the ground.
+	    ledge.scale.setTo(2, 5); // Scale it to fit the width of the game (the original sprite is 400x32 in size)
 	    ledge.body.immovable = true; // This stops it from falling away when you jump on it
-		
-		ledge = platforms.create(0, 0, 'ground'); // Top of the area border
-		ledge.scale.setTo(2, 2);
+	    ledge = platforms.create(0, 380, 'ground'); // Bottom left of the area border
+		ledge.scale.setTo(0.5, 5);
+	    ledge.body.immovable = true;
+	    ledge = platforms.create(600, 380, 'ground'); // Bottom right of the area border
+		ledge.scale.setTo(0.5, 5);
 	    ledge.body.immovable = true;
 		
-		ledge = platforms.create(775, 0, 'wall'); // Right Wall
-		ledge.body.immovable = true;
-		
-		ledge = platforms.create(-25, 0, 'wall'); // Left wall
-		ledge.body.immovable = true;
+		ledge = platforms.create(0, 0, 'ground'); // Top center of the area border
+		ledge.scale.setTo(2, 5);
+	    ledge.body.immovable = true;
+	    ledge = platforms.create(0, 80, 'ground'); // Top left of the area border
+		ledge.scale.setTo(0.5, 5);
+	    ledge.body.immovable = true;
+	    ledge = platforms.create(600, 80, 'ground'); // Top right of the area border
+		ledge.scale.setTo(0.5, 5);
+	    ledge.body.immovable = true;
 
-		//ITEM YOU CAN INTERACT WITH
-		flick = game.add.sprite(game.world.width/2 - 50, game.world.height/2, 'second'); // Add interactable obj
-		//INTERACT PROMPT
-		interact = game.add.sprite(game.world.width/2 - 50, game.world.height/2 - 50, 'interact'); // Add interacting key prompt
+		//ITEM YOU CAN INTERACT WITH 
+		flick = game.add.sprite(game.world.width/2 - 25, game.world.height/2 - 10, 'second'); // Add interactable obj
 		//DOOR YOU CAN USE TO LEAVE
 		door = game.add.sprite(game.world.width-100, game.world.height/2, 'door') // Add door
 		door.scale.setTo(2, 2);
@@ -103,10 +107,13 @@ Stage1.prototype = {
 		door.frame = 0; // Closed door frame
 		doorCheck = false; //Haven't seen the door yet
 
-	    //PLAYER STUFF
+		//PLAYER STUFF
 		makePlayer();
 
-		/*
+		//INTERACT PROMPT
+		interact = game.add.sprite(game.world.width/2 - 25, game.world.height/2 - 50, 'interact'); // Add interacting key prompt
+
+		
 	    //DARKNESS STUFF
 	    dots = game.add.group(); //need this so we can set the alpha
         //fill the 2d array with sprites of dots, so that they can be accessed later. 
@@ -115,7 +122,7 @@ Stage1.prototype = {
         		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
         	}
 		}
-		*/
+		
 		var WASDText = this.add.text(player.position.x + 20, player.position.y - 30, "  W\nASD", {font: "15px Comic Sans MS"});
 	},
 
@@ -148,7 +155,7 @@ Stage1.prototype = {
 			game.state.start('Stage2');
 		}
 
-		/*
+		
 		//DARKNESS STUFF
 		//Reinitialize the entire darkness array to 0
 		for(var y = 0; y < game.height / dotWidth; y ++) {
@@ -159,7 +166,7 @@ Stage1.prototype = {
 		echoDark();
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
-		*/
+		
 	},
 
 	render: function() {
@@ -227,11 +234,9 @@ Stage2.prototype = {
 		ledge = platforms.create(game.world.width/2, game.world.height - 100, 'wall'); // gate 2 bottom
 		ledge.scale.setTo(1, 0.5);
 		ledge.body.immovable = true;
-		
+
 		//IN THIS INSTANCE, THE PLACE YOU NEED TO BRING THE DIAMOND
 		flick = game.add.sprite(550, 150, 'second');
-		//INTERACT PROMPT
-		interact = game.add.sprite(550, game.world.height - 200, 'interact'); // Add interacting key prompt
 		//DOOR YOU CAN USE TO LEAVE
 		door = game.add.sprite(game.world.width-100, game.world.height/2, 'door') // Add door
 		door.scale.setTo(2, 2);
@@ -245,6 +250,10 @@ Stage2.prototype = {
 	    weight.body.collideWorldBounds = true;
 
 		makePlayer();
+
+		//INTERACT PROMPT WITH WEIGHT
+		interact = game.add.sprite(550, game.world.height - 200, 'interact'); // Add interacting key prompt
+
 		echoAmount = 1; //Amount of times player can echolocate
 		star = game.add.sprite(game.world.width/2, game.world.height/2 + 100, 'star'); //adds in powerup in this location
 		//INITIALIZING DARKNESS STUFF
