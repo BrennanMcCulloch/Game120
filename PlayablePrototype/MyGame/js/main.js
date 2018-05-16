@@ -106,6 +106,7 @@ Stage1.prototype = {
 	    //PLAYER STUFF
 		makePlayer();
 
+		/*
 	    //DARKNESS STUFF
 	    dots = game.add.group(); //need this so we can set the alpha
         //fill the 2d array with sprites of dots, so that they can be accessed later. 
@@ -114,7 +115,7 @@ Stage1.prototype = {
         		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
         	}
 		}
-
+		*/
 		var WASDText = this.add.text(player.position.x + 20, player.position.y - 30, "  W\nASD", {font: "15px Comic Sans MS"});
 	},
 
@@ -147,6 +148,7 @@ Stage1.prototype = {
 			game.state.start('Stage2');
 		}
 
+		/*
 		//DARKNESS STUFF
 		//Reinitialize the entire darkness array to 0
 		for(var y = 0; y < game.height / dotWidth; y ++) {
@@ -157,7 +159,7 @@ Stage1.prototype = {
 		echoDark();
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
-
+		*/
 	},
 
 	render: function() {
