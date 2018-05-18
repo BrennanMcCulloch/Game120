@@ -50,6 +50,8 @@ Stage1.prototype = {
 		// preload assets
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json'); //LOAD BEAN
 		game.load.image('dot', 'assets/img/dot.png');
+		//Loading in the assets we need for this stage, aside from walls
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 
 		console.log('Stage1: Preload');
 		game.load.image('sky', 'assets/img/sky.png'); // Preload background
@@ -99,7 +101,7 @@ Stage1.prototype = {
 	    ledge.body.immovable = true;
 
 		//ITEM YOU CAN INTERACT WITH 
-		flick = game.add.sprite(game.world.width/2 - 25, game.world.height/2 - 10, 'second'); // Add interactable obj
+		flick = game.add.sprite(game.world.width/2 - 25, game.world.height/2 - 10, 'atlas', 'fire-log-00'); // Add interactable obj
 		//DOOR YOU CAN USE TO LEAVE
 		door = game.add.sprite(game.world.width-100, game.world.height/2, 'door') // Add door
 		door.scale.setTo(2, 2);
@@ -113,7 +115,7 @@ Stage1.prototype = {
 		//INTERACT PROMPT
 		interact = game.add.sprite(game.world.width/2 - 25, game.world.height/2 - 50, 'interact'); // Add interacting key prompt
 
-		
+		/*
 	    //DARKNESS STUFF
 	    dots = game.add.group(); //need this so we can set the alpha
         //fill the 2d array with sprites of dots, so that they can be accessed later. 
@@ -122,7 +124,7 @@ Stage1.prototype = {
         		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
         	}
 		}
-		
+		*/
 		var WASDText = this.add.text(player.position.x + 20, player.position.y - 30, "  W\nASD", {font: "15px Comic Sans MS"});
 	},
 
@@ -155,7 +157,7 @@ Stage1.prototype = {
 			game.state.start('Stage2');
 		}
 
-		
+		/*
 		//DARKNESS STUFF
 		//Reinitialize the entire darkness array to 0
 		for(var y = 0; y < game.height / dotWidth; y ++) {
@@ -166,6 +168,7 @@ Stage1.prototype = {
 		echoDark();
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		*/
 		
 	},
 
