@@ -101,7 +101,10 @@ Stage1.prototype = {
 	    ledge.body.immovable = true;
 
 		//ITEM YOU CAN INTERACT WITH 
-		flick = game.add.sprite(game.world.width/2 - 25, game.world.height/2 - 10, 'atlas', 'fire-log-00'); // Add interactable obj
+		flick = game.add.sprite(game.world.width/2 - 25, game.world.height/2 - 10, 'atlas', 'torch'); // Add interactable obj
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
+		flick.scale.setTo(0.5, 0.5);
+		flick.anchor.setTo(0.5, 0.5);
 		//DOOR YOU CAN USE TO LEAVE
 		door = game.add.sprite(game.world.width-100, game.world.height/2, 'door') // Add door
 		door.scale.setTo(2, 2);
@@ -148,6 +151,7 @@ Stage1.prototype = {
 			{
 				door.frame = 1; // Change door sprite into "open" frame
 				unlock.play();
+				flick.animations.play('alight', 10, true);
 			}
 	    }
 
