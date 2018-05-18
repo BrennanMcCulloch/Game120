@@ -1,7 +1,7 @@
 //Brennan McCulloch Development Branch. Adding this comment to test if my github desktop works on my laptop, which it should. 
 var game = new Phaser.Game(800, 600, Phaser.AUTO); // Creates a 800 x 600 screen in which the game is displayed
 var ledge, platforms, player, door, doorCheck;
-var fwoosh, unlock, echoSound, echoFill;
+var fwoosh, unlock, echoSound, echoFill, lookBack;
 var echoAmount = 1; 
 //DARKNESS VARIABLES	
 var dots;
@@ -56,21 +56,20 @@ Stage1.prototype = {
 		console.log('Stage1: Preload');
 		game.load.image('sky', 'assets/img/sky.png'); // Preload background
 	    game.load.image('ground', 'assets/img/platform.png'); // Preload platform
-	    game.load.image('wall', 'assets/img/wall.png');
-		game.load.image('diamond', 'assets/img/diamond.png'); // Preload weight
-		game.load.image('second', 'assets/img/obj.png'); // Preload object which player interacts with
-		game.load.spritesheet('interact', 'assets/img/Interact.png', 32, 32); // Preload the key prompt when near interacting obj
 		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
 	
 		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
 		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
 		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
+		game.load.audio('lookBack', 'assets/audio/lookBack.mp3');
 	},
 
 	create: function() {
 		fwoosh = game.add.audio('fwoosh');
 		unlock = game.add.audio('unlock');
 		echoSound = game.add.audio('echoSound');
+		lookBack = game.add.audio('lookBack');
+		lookBack.volume = 0.5;
 
 		console.log('Stage1: Create');
 	    game.physics.startSystem(Phaser.Physics.ARCADE); // We're going to be using physics, so enable the Arcade Physics system
@@ -101,12 +100,12 @@ Stage1.prototype = {
 	    ledge.body.immovable = true;
 
 		//ITEM YOU CAN INTERACT WITH 
-		flick = game.add.sprite(game.world.width/2 - 25, game.world.height/2 - 10, 'atlas', 'torch'); // Add interactable obj
+		flick = game.add.sprite(game.world.width/2 - 10, game.world.height/2 + 30, 'atlas', 'torch'); // Add interactable obj
 		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
 		flick.scale.setTo(0.5, 0.5);
 		flick.anchor.setTo(0.5, 0.5);
 		//DOOR YOU CAN USE TO LEAVE
-		door = game.add.sprite(game.world.width-100, game.world.height/2, 'door') // Add door
+		door = game.add.sprite(game.world.width-100, game.world.height/2 + 10, 'door') // Add door
 		door.scale.setTo(2, 2);
 		door.anchor.setTo(0.5, 0.5);
 		door.frame = 0; // Closed door frame
@@ -116,9 +115,12 @@ Stage1.prototype = {
 		makePlayer();
 
 		//INTERACT PROMPT
-		interact = game.add.sprite(game.world.width/2 - 25, game.world.height/2 - 50, 'interact'); // Add interacting key prompt
+		interact = game.add.sprite(game.world.width/2 - 20, game.world.height/2 - 40, 'atlas', 'e'); // Add interacting key prompt
+		interact.scale.setTo(0.5, 0.55);
 
-		/*
+		WASDText = game.add.sprite(player.position.x + 20, player.position.y - 20, 'atlas', 'wasd');
+		WASDText.scale.setTo(0.2, 0.2);
+		
 	    //DARKNESS STUFF
 	    dots = game.add.group(); //need this so we can set the alpha
         //fill the 2d array with sprites of dots, so that they can be accessed later. 
@@ -127,8 +129,6 @@ Stage1.prototype = {
         		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
         	}
 		}
-		*/
-		var WASDText = this.add.text(player.position.x + 20, player.position.y - 30, "  W\nASD", {font: "15px Comic Sans MS"});
 	},
 
 	update: function() {
@@ -138,20 +138,22 @@ Stage1.prototype = {
 	    
 	    if(player.body.position.x >= 650 && doorCheck != true) {
 			doorCheck = true; //They've seen the door
-			fwoosh.play(); //play fire sound
+			lookBack.play(); //play fire sound
 		}
 
 		//E PROMPT INTERACTION
-		interact.frame = 0; // 1st frame of key prompt is empty space	
+		interact.alpha = 0; // 1st frame of key prompt is empty space	
 		// Source: https://phaser.io/examples/v2/sprites/overlap-without-physics
 		if (checkOverlap(player, flick) && door.frame != 1 && doorCheck == true) // When player sprite overlaps interactable obj
 	    {
-			interact.frame = 1; // Change key prompt frame into image of key
+			interact.alpha = 1; // Change key prompt frame into image of key
 			if(game.input.keyboard.justPressed(Phaser.Keyboard.E)) // When key prompt pressed
 			{
 				door.frame = 1; // Change door sprite into "open" frame
 				unlock.play();
+				fwoosh.play();
 				flick.animations.play('alight', 10, true);
+				flick.position.y = flick.position.y - 19; //resetting sprite height
 			}
 	    }
 
@@ -161,7 +163,7 @@ Stage1.prototype = {
 			game.state.start('Stage2');
 		}
 
-		/*
+		
 		//DARKNESS STUFF
 		//Reinitialize the entire darkness array to 0
 		for(var y = 0; y < game.height / dotWidth; y ++) {
@@ -172,7 +174,9 @@ Stage1.prototype = {
 		echoDark();
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
-		*/
+		if(doorCheck == true && door.frame == 1){
+			erase(darkArray, flick.position.x, flick.position.y, 7, -1);
+		}
 		
 	},
 
@@ -194,21 +198,23 @@ Stage2.prototype = {
 		game.load.image('dot', 'assets/img/dot.png');
 		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation. 
 		//in case you start in stage 2
+
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+
 		game.load.image('sky', 'assets/img/sky.png'); // Preload background
 	    game.load.image('ground', 'assets/img/platform.png'); // Preload platform
 	    game.load.image('wall', 'assets/img/wall.png');
-		game.load.image('diamond', 'assets/img/diamond.png'); // Preload weight
-		game.load.image('second', 'assets/img/obj.png'); // Preload object which player interacts with
-		game.load.spritesheet('interact', 'assets/img/Interact.png', 32, 32); // Preload the key prompt when near interacting obj
 		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
 	
 		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
 		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
 		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
+		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
 	},
 
 	create: function() {
 		console.log('Stage2: Create');
+		fwoosh = game.add.audio('fwoosh');
 		unlock = game.add.audio('unlock');
 		echoSound = game.add.audio('echoSound');
 		echoFill = game.add.audio('echoFill');
@@ -225,25 +231,22 @@ Stage2.prototype = {
 		ledge = platforms.create(0, 0, 'ground'); // Top of the area border
 		ledge.scale.setTo(2, 2);
 	    ledge.body.immovable = true;
-		ledge = platforms.create(775, 0, 'wall'); // Right Wall
-		ledge.body.immovable = true;
-		ledge = platforms.create(-25, 0, 'wall'); // Left wall
-		ledge.body.immovable = true;
-		ledge = platforms.create(game.world.width/4, -150, 'wall'); // gate 1 top
-		ledge.scale.setTo(1, 0.5);
+		ledge = platforms.create(game.world.width/4, -225, 'wall'); // gate 1 top
 		ledge.body.immovable = true;
 		ledge.body.setSize(60, 570, -2, 0);
-		ledge = platforms.create(game.world.width/4, game.world.height/2 - 50, 'wall'); // gate 1 bottom
+		ledge = platforms.create(game.world.width/4, game.world.height -100, 'wall'); // gate 1 bottom
 		ledge.body.immovable = true;
-		ledge = platforms.create(game.world.width/2, -225, 'wall'); // gate 2 top
+		ledge = platforms.create(game.world.width/2, -450, 'wall'); // gate 2 top
 		ledge.body.immovable = true;
 		ledge.body.setSize(60, 570, -2, 0);
-		ledge = platforms.create(game.world.width/2, game.world.height - 100, 'wall'); // gate 2 bottom
-		ledge.scale.setTo(1, 0.5);
+		ledge = platforms.create(game.world.width/2, game.world.height/2 - 50, 'wall'); // gate 2 bottom
 		ledge.body.immovable = true;
 
 		//IN THIS INSTANCE, THE PLACE YOU NEED TO BRING THE DIAMOND
-		flick = game.add.sprite(550, 150, 'second');
+		flick = game.add.sprite(550, 180, 'atlas', 'sticks');
+		flick.scale.setTo(0.3, 0.3);
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
 		//DOOR YOU CAN USE TO LEAVE
 		door = game.add.sprite(game.world.width-100, game.world.height/2, 'door') // Add door
 		door.scale.setTo(2, 2);
@@ -251,18 +254,22 @@ Stage2.prototype = {
 		door.frame = 0; // Closed door frame
 		doorCheck = false; //IN THIS STAGE, haven't picked up the weight yet
 		
-		weight =  game.add.sprite(550, game.world.height - 150, 'diamond'); // Add weight
-		game.physics.arcade.enable(weight); // Apply physics on weight?
-		weight.body.bounce.y = 0.2;
-	    weight.body.collideWorldBounds = true;
+		weight =  game.add.sprite(550, game.world.height - 150, 'atlas', 'gascan'); // Add weight
+		weight.scale.setTo(0.3, 0.3);
 
 		makePlayer();
 
 		//INTERACT PROMPT WITH WEIGHT
-		interact = game.add.sprite(550, game.world.height - 200, 'interact'); // Add interacting key prompt
+		interact = game.add.sprite(550, game.world.height - 200, 'atlas', 'e'); // Add interacting key prompt
+		interact.scale.setTo(0.5, 0.55);
 
 		echoAmount = 1; //Amount of times player can echolocate
-		star = game.add.sprite(game.world.width/2, game.world.height/2 + 100, 'star'); //adds in powerup in this location
+		star = game.add.sprite(game.world.width/2 + 50, game.world.height/2 - 125, 'star'); //adds in powerup in this location
+
+		QText = game.add.sprite(player.position.x + 20, player.position.y - 20, 'atlas', 'q');
+		QText.scale.setTo(0.5, 0.5);
+
+		
 		//INITIALIZING DARKNESS STUFF
 		dots = game.add.group();
 		for(var y = 0; y < game.height / dotWidth; y ++) {
@@ -270,8 +277,7 @@ Stage2.prototype = {
         		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
         	}
 		}
-
-		var QText = this.add.text(player.position.x + 20, player.position.y - 30, "  Q", {font: "15px Comic Sans MS"});
+		
 	},
 
 	update: function() {
@@ -286,16 +292,18 @@ Stage2.prototype = {
 
 
 		//E PROMPT INTERACTION
-		interact.frame = 0; // 1st frame of key prompt is empty space
-		interact.position.x = weight.position.x; //The interact prompt should always appear above the diamond
+		interact.alpha = 0; // 1st frame of key prompt is empty space
+		interact.position.x = weight.position.x + 5; //The interact prompt should always appear above the diamond
 		interact.position.y = weight.position.y - 40;	
 		// Source: https://phaser.io/examples/v2/sprites/overlap-without-physics
 		if (checkOverlap(weight, flick) && door.frame != 1) // When the weight and the destination overlap
 	    {
 			weight.kill(); // Removes the star from the screen
-			flick.kill();
+			flick.animations.play('alight', 10, true);
+			flick.position.y = flick.position.y - 28; //resetting sprite height
 			door.frame = 1; // Change door sprite into "open" frame. You win!
 			unlock.play();
+			fwoosh.play();
 	    }
 		
 		//HOLDING THE "WEIGHT" USING DOORCHECK
@@ -307,9 +315,9 @@ Stage2.prototype = {
 			doorCheck = false;
 		}
 		//PICKING UP THE "WEIGHT"
-		if (checkOverlap(player, weight) && door.frame != 1) // When player overlaps weight
+		if (checkOverlap(player, weight) && door.frame != 1 && doorCheck == false) // When player overlaps weight
 	    {
-	    	interact.frame = 1;
+	    	interact.alpha = 1;
 			// Source: https://phaser.io/examples/v2/input/follow-mouse
 			if (game.input.keyboard.justPressed(Phaser.Keyboard.E)) // When interact is pressed down
 			{
@@ -324,11 +332,15 @@ Stage2.prototype = {
 			game.state.start('MainMenu');
 		}
 
-
+		
 		//DARKNESS STUFF
 		echoDark(); //enabling echolocation ability
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		if(door.frame == 1) {
+			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
+		}
+		
 	},
 
 	render: function() {
@@ -387,7 +399,7 @@ function playerMovement() {
 }
 
 function makePlayer() {
-		player = game.add.sprite(50, game.world.height/2, 'bean', 'bean-float-00'); // The player and its settings
+		player = game.add.sprite(60, game.world.height/2, 'bean', 'bean-float-00'); // The player and its settings
 	    game.physics.arcade.enable(player); // We need to enable physics on the player
 	    player.body.collideWorldBounds = true;
 	    player.scale.setTo(0.25, 0.25);
