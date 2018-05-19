@@ -246,8 +246,10 @@ Stage2.prototype = {
 		
 		weight =  game.add.sprite(550, game.world.height - 150, 'diamond'); // Add weight
 		game.physics.arcade.enable(weight); // Apply physics on weight?
-		weight.body.bounce.y = 0.2;
 	    weight.body.collideWorldBounds = true;
+		weight.body.bounce.set(0.8);
+		weight.body.drag.x = 100;
+		weight.body.drag.y = 100;
 
 		makePlayer();
 
@@ -299,6 +301,182 @@ Stage2.prototype = {
 		if(doorCheck == true && game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
 			doorCheck = false;
 		}
+		// Source: https://phaser.io/examples/v2/input/follow-mouse
+			if (doorCheck == true && game.input.mousePointer.isDown) // When mouse is pressed down
+			{
+	        //  400 is the speed it will move towards the mouse
+	        doorCheck = false;
+			game.physics.arcade.moveToPointer(weight, 400); // Weight follows where the mouse cursor is located
+			}
+		//PICKING UP THE "WEIGHT"
+		if (checkOverlap(player, weight) && door.frame != 1) // When player overlaps weight
+	    {
+	    	interact.frame = 1;
+			// Source: https://phaser.io/examples/v2/input/follow-mouse
+			if (game.input.keyboard.justPressed(Phaser.Keyboard.E)) // When interact is pressed down
+			{
+	        //pick up the weight
+	        doorCheck = true;
+			}
+		}
+
+		//WIN CONDITIONS
+		if(checkOverlap(player, door) && door.frame == 1) 
+		{
+			game.state.start('Stage3');
+		}
+
+
+		//DARKNESS STUFF
+		echoDark(); //enabling echolocation ability
+		//erase around the player character
+		erase(darkArray, player.position.x, player.position.y, 7, -1);
+	},
+
+	render: function() {
+
+	}
+}
+
+/*STAGE 3!!
+* Slightly more complex puzzle that teaches navigation ideas and echolocation mechanic.  
+*/
+var Stage3 = function(game) {};
+Stage3.prototype = {
+	
+	preload: function() {
+		//Note: once preloaded in one state, a sprite does not need to be preloaded in any other states. 
+		console.log("Stage3: Preload");
+		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
+		game.load.image('dot', 'assets/img/dot.png');
+		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation. 
+		//in case you start in stage 2
+		game.load.image('sky', 'assets/img/sky.png'); // Preload background
+	    game.load.image('ground', 'assets/img/platform.png'); // Preload platform
+	    game.load.image('wall', 'assets/img/wall.png');
+		game.load.image('diamond', 'assets/img/diamond.png'); // Preload weight
+		game.load.image('second', 'assets/img/obj.png'); // Preload object which player interacts with
+		game.load.spritesheet('interact', 'assets/img/Interact.png', 32, 32); // Preload the key prompt when near interacting obj
+		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
+	
+		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
+		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
+		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
+	},
+
+	create: function() {
+		console.log('Stage3: Create');
+		unlock = game.add.audio('unlock');
+		echoSound = game.add.audio('echoSound');
+		echoFill = game.add.audio('echoFill');
+		
+		game.add.image(0, 0, 'sky'); // A simple background for our game
+		game.physics.startSystem(Phaser.Physics.ARCADE); // We're going to be using physics, so enable the Arcade Physics system
+		
+		//MAKING THE WORLDBOUNDS THAT WE CANNOT ESCAPE FROM BECAUSE WE ARE DOOMED IN THIS LIFE
+	    platforms = game.add.group(); // The platforms group contains the ground and the 2 ledges we can jump on
+	    platforms.enableBody = true; // We will enable physics for any object that is created in this group
+		ledge = platforms.create(0, game.world.height - 64, 'ground'); // Here we create the ground.
+	    ledge.scale.setTo(2, 2); // Scale it to fit the width of the game (the original sprite is 400x32 in size)
+	    ledge.body.immovable = true; // This stops it from falling away when you jump on it	
+		ledge = platforms.create(0, 0, 'ground'); // Top of the area border
+		ledge.scale.setTo(2, 2);
+	    ledge.body.immovable = true;
+		ledge = platforms.create(775, 0, 'wall'); // Right Wall
+		ledge.body.immovable = true;
+		ledge = platforms.create(-25, 0, 'wall'); // Left wall
+		ledge.body.immovable = true;
+		ledge = platforms.create(game.world.width/4, 0, 'wall'); // gate 1 top
+		ledge.scale.setTo(1, 0.5);
+		ledge.body.immovable = true;
+		ledge.body.setSize(60, 570, -2, 0);
+		ledge = platforms.create(game.world.width/4, game.world.height - 150, 'wall'); // gate 1 bottom
+		ledge.body.immovable = true;
+		ledge = platforms.create(505, -150, 'wall'); // gate 2 top
+		ledge.scale.setTo(1, 0.5);
+		ledge.body.immovable = true;
+		ledge.body.setSize(60, 570, -2, 0);
+		ledge = platforms.create(450, game.world.height/2 - 50, 'wall'); // gate 2 bottom
+		ledge.body.immovable = true;
+		ledge = platforms.create(600, -325, 'wall'); // gate 3 top
+		ledge.body.immovable = true;
+		ledge.body.setSize(60, 570, -2, 0);
+		ledge = platforms.create(600, game.world.height - 250, 'wall'); // gate 3 bottom
+		ledge.scale.setTo(1, 0.5);
+		ledge.body.immovable = true;
+
+		//IN THIS INSTANCE, THE PLACE YOU NEED TO BRING THE DIAMOND
+		flick = game.add.sprite(567, 68, 'second');
+		//DOOR YOU CAN USE TO LEAVE
+		door = game.add.sprite(game.world.width-100, game.world.height/2, 'door') // Add door
+		door.scale.setTo(2, 2);
+		door.anchor.setTo(0.5, 0.5);
+		door.frame = 0; // Closed door frame
+		doorCheck = false; //IN THIS STAGE, haven't picked up the weight yet
+		
+		weight =  game.add.sprite(550, game.world.height - 150, 'diamond'); // Add weight
+		game.physics.arcade.enable(weight); // Apply physics on weight?
+	    weight.body.collideWorldBounds = true;
+		weight.body.bounce.set(0.8);
+		weight.body.drag.x = 100;
+		weight.body.drag.y = 100;
+
+		makePlayer();
+
+		//INTERACT PROMPT WITH WEIGHT
+		interact = game.add.sprite(550, game.world.height - 200, 'interact'); // Add interacting key prompt
+
+		echoAmount = 1; //Amount of times player can echolocate
+		star = game.add.sprite(game.world.width/2, game.world.height/2 + 100, 'star'); //adds in powerup in this location
+		//INITIALIZING DARKNESS STUFF
+		dots = game.add.group();
+		for(var y = 0; y < game.height / dotWidth; y ++) {
+        	for(var x = 0; x < game.width / dotWidth; x ++) {
+        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+        	}
+		}
+
+		var QText = this.add.text(player.position.x + 20, player.position.y - 30, "  Q", {font: "15px Comic Sans MS"});
+	},
+
+	update: function() {
+		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
+		var hitPlatform3 = game.physics.arcade.collide(weight, platforms); // Apply colliding physics between weight and platforms
+		playerMovement();
+		if(checkOverlap(player, star) && star.alive) { //picks up the powerup and gains the player 1 life
+			star.kill();
+			echoAmount++;
+			echoFill.play();
+		}
+
+		//E PROMPT INTERACTION
+		interact.frame = 0; // 1st frame of key prompt is empty space
+		interact.position.x = weight.position.x; //The interact prompt should always appear above the diamond
+		interact.position.y = weight.position.y - 40;
+		// Source: https://phaser.io/examples/v2/sprites/overlap-without-physics
+		if (checkOverlap(weight, flick) && door.frame != 1) // When the weight and the destination overlap
+	    {
+			weight.kill(); // Removes the star from the screen
+			flick.kill();
+			door.frame = 1; // Change door sprite into "open" frame. You win!
+			unlock.play();
+	    }
+		
+		//HOLDING THE "WEIGHT" USING DOORCHECK
+		if(doorCheck == true) {
+			weight.position.x = player.position.x + 30;
+			weight.position.y = player.position.y;
+		}
+		if(doorCheck == true && game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
+			doorCheck = false;
+		}
+		// Source: https://phaser.io/examples/v2/input/follow-mouse
+			if (doorCheck == true && game.input.mousePointer.isDown) // When mouse is pressed down
+			{
+	        //  400 is the speed it will move towards the mouse
+	        doorCheck = false;
+			game.physics.arcade.moveToPointer(weight, 400); // Weight follows where the mouse cursor is located
+			}
 		//PICKING UP THE "WEIGHT"
 		if (checkOverlap(player, weight) && door.frame != 1) // When player overlaps weight
 	    {
@@ -328,9 +506,6 @@ Stage2.prototype = {
 
 	}
 }
-
-
-
 
 //EXTRA FUNCTIONS NEEDED TO MAKE STUFF WORK
 
@@ -500,5 +675,6 @@ function echoDark() {
 game.state.add('MainMenu', MainMenu);
 game.state.add('Stage1', Stage1);
 game.state.add('Stage2', Stage2);
+game.state.add('Stage3', Stage3);
 //Actually starts the game in our Main Menu state!
 game.state.start('MainMenu');
