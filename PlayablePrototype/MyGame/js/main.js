@@ -558,17 +558,22 @@ Stage4.prototype = {
 		torches.callAll('animations.add', 'animations', 'alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
 		torches.callAll('play', null, 'alight', 10, true);
 
+		//thing to light on fire
 		flick = game.add.sprite(670, 300, 'atlas', 'sticks');
 		flick.scale.setTo(0.5, 0.5);
 		flick.anchor.setTo(0.5, 0.5);
 		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
-
+		//door to exit from
 		door = game.add.sprite(200, 100, 'door') // Add door
 		door.scale.setTo(2, 2);
 		door.anchor.setTo(0.5, 0.5);
 		door.frame = 0;
 
 		makePlayer();
+
+		//LET'S TRY MAKING SOMETHING THROWABLE (throwable needs to be called AFTER the player is initialized)
+		var match = new Throwable(game, 100, 500, 'atlas', 'gascan', player);
+		game.add.existing(match);
 	},
 
 	update: function() {
