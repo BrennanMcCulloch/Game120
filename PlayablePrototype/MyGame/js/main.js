@@ -1,6 +1,6 @@
 //Development Branch
 var game = new Phaser.Game(800, 600, Phaser.AUTO); // Creates a 800 x 600 screen in which the game is displayed
-var ledge, platforms, player, door, doorCheck;
+var ledge, platforms, torches, player, door, doorCheck;
 var fwoosh, unlock, echoSound, echoFill, lookBack;
 var echoAmount = 1; 
 //DARKNESS VARIABLES	
@@ -357,7 +357,7 @@ Stage2.prototype = {
 }
 
 /*STAGE 3!!
-* Slightly more complex puzzle that teaches navigation ideas and echolocation mechanic.  
+* We'll leave this up to Nithin to build, since he created it.  
 */
 var Stage3 = function(game) {};
 Stage3.prototype = {
@@ -510,7 +510,7 @@ Stage3.prototype = {
 		//WIN CONDITIONS
 		if(checkOverlap(player, door) && door.frame == 1) 
 		{
-			game.state.start('MainMenu');
+			game.state.start('Stage4');
 		}
 
 
@@ -525,8 +525,65 @@ Stage3.prototype = {
 	}
 }
 
-//EXTRA FUNCTIONS NEEDED TO MAKE STUFF WORK
+var Stage4 = function(game) {};
+Stage4.prototype = {
+	
+	preload: function() {
+		console.log("Stage4: Preload");
+		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 
+		game.load.image('wall', 'assets/img/wall.png');
+		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
+	},
+	
+	create: function() {
+		console.log("Stage4: Create");
+		game.stage.backgroundColor = "#facade";
+
+		platforms = game.add.group();
+		platforms.enableBody = true;
+		ledge = platforms.create(450, 0, 'wall'); // Right Wall
+		ledge.body.immovable = true;
+
+		//making torches a new group so that the matches group can overlap with it
+		torches = game.add.group();
+		torches.enableBody = true;
+		torches.scale.setTo(0.5, 0.5); //reduces size of all members of the group, but halves their natural xy pos.
+		ledge = torches.create(270, 100, 'atlas', 'torch'); //left side of door
+		ledge = torches.create(470, 100, 'atlas', 'torch'); //right side of door
+		ledge = torches.create(1300, 300, 'atlas', 'torch'); //above burn pile
+		ledge = torches.create(1300, 700, 'atlas', 'torch'); //below burn pile
+		//plays the animation on all members of the torches group
+		torches.callAll('animations.add', 'animations', 'alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
+		torches.callAll('play', null, 'alight', 10, true);
+
+		flick = game.add.sprite(670, 300, 'atlas', 'sticks');
+		flick.scale.setTo(0.5, 0.5);
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
+
+		door = game.add.sprite(200, 100, 'door') // Add door
+		door.scale.setTo(2, 2);
+		door.anchor.setTo(0.5, 0.5);
+		door.frame = 0;
+
+		makePlayer();
+	},
+
+	update: function() {
+		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
+
+		playerMovement();
+	},
+
+	render: function() {
+
+	}
+
+}
+
+//EXTRA FUNCTIONS NEEDED TO MAKE STUFF WORK
 // Source: https://phaser.io/examples/v2/sprites/overlap-without-physics
 function checkOverlap(player, flick) // Sets up boundaries between player and interactable obj.
 {
@@ -536,6 +593,7 @@ function checkOverlap(player, flick) // Sets up boundaries between player and in
     return Phaser.Rectangle.intersects(boundsA, boundsB);
 }
 
+//update player
 function playerMovement() {
  //Reset the players velocity (movement)
  	player.events.onAnimationComplete.add(function(){ player.animations.play('float') }, this);
@@ -571,7 +629,7 @@ function playerMovement() {
 		player.animations.play('grab');
 	}
 }
-
+//create player
 function makePlayer() {
 		player = game.add.sprite(60, game.world.height/2, 'bean', 'bean-float-00'); // The player and its settings
 	    game.physics.arcade.enable(player); // We need to enable physics on the player
@@ -660,7 +718,7 @@ function erase(darkness, xPos, yPos, radius, innerRad) { //xPos yPos are center 
 
 	}
 }
-
+//echolocation around player
 function echoDark() {
 	//Reinitialize the entire darkness array to 0
 	for(var y = 0; y < game.height / dotWidth; y ++) {
@@ -694,5 +752,6 @@ game.state.add('MainMenu', MainMenu);
 game.state.add('Stage1', Stage1);
 game.state.add('Stage2', Stage2);
 game.state.add('Stage3', Stage3);
+game.state.add('Stage4', Stage4);
 //Actually starts the game in our Main Menu state!
-game.state.start('MainMenu');
+game.state.start('Stage4');
