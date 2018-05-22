@@ -80,23 +80,23 @@ Stage1.prototype = {
 	    platforms.enableBody = true; // We will enable physics for any object that is created in this group
 		
 	    ledge = platforms.create(0, 450, 'ground'); // Here we create the ground.
-	    ledge.scale.setTo(2, 5); // Scale it to fit the width of the game (the original sprite is 400x32 in size)
+	    ledge.scale.setTo(1, 3); // Scale it to fit the width of the game (the original sprite is 400x32 in size)
 	    ledge.body.immovable = true; // This stops it from falling away when you jump on it
 	    ledge = platforms.create(0, 380, 'ground'); // Bottom left of the area border
-		ledge.scale.setTo(0.5, 5);
+		ledge.scale.setTo(0.25, 2);
 	    ledge.body.immovable = true;
 	    ledge = platforms.create(600, 380, 'ground'); // Bottom right of the area border
-		ledge.scale.setTo(0.5, 5);
+		ledge.scale.setTo(0.25, 2);
 	    ledge.body.immovable = true;
 		
 		ledge = platforms.create(0, 0, 'ground'); // Top center of the area border
-		ledge.scale.setTo(2, 5);
+		ledge.scale.setTo(1, 3);
 	    ledge.body.immovable = true;
-	    ledge = platforms.create(0, 80, 'ground'); // Top left of the area border
-		ledge.scale.setTo(0.5, 5);
+	    ledge = platforms.create(0, 100, 'ground'); // Top left of the area border
+		ledge.scale.setTo(0.25, 2);
 	    ledge.body.immovable = true;
-	    ledge = platforms.create(600, 80, 'ground'); // Top right of the area border
-		ledge.scale.setTo(0.5, 5);
+	    ledge = platforms.create(600, 100, 'ground'); // Top right of the area border
+		ledge.scale.setTo(0.25, 2);
 	    ledge.body.immovable = true;
 
 		//ITEM YOU CAN INTERACT WITH 
@@ -166,11 +166,6 @@ Stage1.prototype = {
 		
 		//DARKNESS STUFF
 		//Reinitialize the entire darkness array to 0
-		for(var y = 0; y < game.height / dotWidth; y ++) {
-        	for(var x = 0; x < game.width / dotWidth; x ++) {
-        		darkArray[x][y].alpha = 1;
-        	}
-		}
 		echoDark();
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
@@ -225,12 +220,6 @@ Stage2.prototype = {
 		//MAKING THE WORLDBOUNDS THAT WE CANNOT ESCAPE FROM BECAUSE WE ARE DOOMED IN THIS LIFE
 	    platforms = game.add.group(); // The platforms group contains the ground and the 2 ledges we can jump on
 	    platforms.enableBody = true; // We will enable physics for any object that is created in this group
-		ledge = platforms.create(0, game.world.height - 64, 'ground'); // Here we create the ground.
-	    ledge.scale.setTo(2, 2); // Scale it to fit the width of the game (the original sprite is 400x32 in size)
-	    ledge.body.immovable = true; // This stops it from falling away when you jump on it	
-		ledge = platforms.create(0, 0, 'ground'); // Top of the area border
-		ledge.scale.setTo(2, 2);
-	    ledge.body.immovable = true;
 		ledge = platforms.create(game.world.width/4, -225, 'wall'); // gate 1 top
 		ledge.body.immovable = true;
 		ledge.body.setSize(60, 570, -2, 0);
@@ -394,16 +383,6 @@ Stage3.prototype = {
 		//MAKING THE WORLDBOUNDS THAT WE CANNOT ESCAPE FROM BECAUSE WE ARE DOOMED IN THIS LIFE
 	    platforms = game.add.group(); // The platforms group contains the ground and the 2 ledges we can jump on
 	    platforms.enableBody = true; // We will enable physics for any object that is created in this group
-		ledge = platforms.create(0, game.world.height - 64, 'ground'); // Here we create the ground.
-	    ledge.scale.setTo(2, 2); // Scale it to fit the width of the game (the original sprite is 400x32 in size)
-	    ledge.body.immovable = true; // This stops it from falling away when you jump on it	
-		ledge = platforms.create(0, 0, 'ground'); // Top of the area border
-		ledge.scale.setTo(2, 2);
-	    ledge.body.immovable = true;
-		ledge = platforms.create(775, 0, 'wall'); // Right Wall
-		ledge.body.immovable = true;
-		ledge = platforms.create(-25, 0, 'wall'); // Left wall
-		ledge.body.immovable = true;
 		ledge = platforms.create(game.world.width/4, 0, 'wall'); // gate 1 top
 		ledge.scale.setTo(1, 0.5);
 		ledge.body.immovable = true;
@@ -446,13 +425,13 @@ Stage3.prototype = {
 
 		echoAmount = 1; //Amount of times player can echolocate
 		star = game.add.sprite(game.world.width/2, game.world.height/2 + 100, 'star'); //adds in powerup in this location
-		//INITIALIZING DARKNESS STUFF
-		dots = game.add.group();
-		for(var y = 0; y < game.height / dotWidth; y ++) {
-        	for(var x = 0; x < game.width / dotWidth; x ++) {
-        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
-        	}
-		}
+		// //INITIALIZING DARKNESS STUFF
+		// dots = game.add.group();
+		// for(var y = 0; y < game.height / dotWidth; y ++) {
+  //       	for(var x = 0; x < game.width / dotWidth; x ++) {
+  //       		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+  //       	}
+		// }
 
 		var QText = this.add.text(player.position.x + 20, player.position.y - 30, "  Q", {font: "15px Comic Sans MS"});
 	},
@@ -514,10 +493,10 @@ Stage3.prototype = {
 		}
 
 
-		//DARKNESS STUFF
-		echoDark(); //enabling echolocation ability
-		//erase around the player character
-		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		// //DARKNESS STUFF
+		// echoDark(); //enabling echolocation ability
+		// //erase around the player character
+		// erase(darkArray, player.position.x, player.position.y, 7, -1);
 	},
 
 	render: function() {
@@ -525,6 +504,9 @@ Stage3.prototype = {
 	}
 }
 
+/*STAGE 4!!
+* Player has to light a match on fire and throw it into the wood pile across the gap.
+*/
 var Stage4 = function(game) {};
 Stage4.prototype = {
 	
@@ -674,7 +656,6 @@ Stage4.prototype = {
 			game.debug.body(match);
 		}*/
 	}
-
 }
 
 //EXTRA FUNCTIONS NEEDED TO MAKE STUFF WORK
@@ -848,4 +829,4 @@ game.state.add('Stage2', Stage2);
 game.state.add('Stage3', Stage3);
 game.state.add('Stage4', Stage4);
 //Actually starts the game in our Main Menu state!
-game.state.start('Stage4');
+game.state.start('Stage3');
