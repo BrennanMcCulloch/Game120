@@ -262,7 +262,7 @@ Stage2.prototype = {
 
 		//INTERACT PROMPT WITH WEIGHT
 		interact = game.add.sprite(550, game.world.height - 200, 'atlas', 'e'); // Add interacting key prompt
-		interact.scale.setTo(0.5, 0.55);
+		interact.scale.setTo(0.5, 0.5);
 
 		echoAmount = 1; //Amount of times player can echolocate
 		star = game.add.sprite(game.world.width/2 + 50, game.world.height/2 - 125, 'star'); //adds in powerup in this location
@@ -532,13 +532,23 @@ Stage4.prototype = {
 		console.log("Stage4: Preload");
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+		game.load.image('dot', 'assets/img/dot.png');
 
 		game.load.image('wall', 'assets/img/wall.png');
 		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
+
+		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
+		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
+		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
+		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
 	},
 	
 	create: function() {
 		console.log("Stage4: Create");
+		fwoosh = game.add.audio('fwoosh');
+		unlock = game.add.audio('unlock');
+		echoSound = game.add.audio('echoSound');
+		echoFill = game.add.audio('echoFill');
 		game.stage.backgroundColor = "#facade";
 		doorCheck = false; //is the torch on fire?
 
@@ -570,31 +580,38 @@ Stage4.prototype = {
 		door.anchor.setTo(0.5, 0.5);
 		door.frame = 0;
 
-		makePlayer();
-
 		//THROWABLE DISPENSER
 		dispenser = game.add.sprite(100, 500, 'atlas', 'gascan');
+
+		makePlayer();
+
+		//e prompts
+		interactDispenser = game.add.sprite(dispenser.position.x + 50, dispenser.position.y - 50, 'atlas', 'e'); // Add interacting key prompt
+		interactDispenser.scale.setTo(0.5, 0.5);
+		interact = game.add.sprite(800, 600, 'atlas', 'e'); //over the match
+		interact.scale.setTo(0.5, 0.5);
+
+		match = new Throwable(game, 1000, 1000, 'atlas', 'torch', player);
+		game.add.existing(match);
+		match.scale.setTo(0.25, 0.25);
+		match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
+		match.animations.add('off', ['torch']); //animation of a single sprite. It's off, b. 
+
+		//INITIALIZING DARKNESS STUFF
+		dots = game.add.group();
+		for(var y = 0; y < game.height / dotWidth; y ++) {
+        	for(var x = 0; x < game.width / dotWidth; x ++) {
+        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+        	}
+		}
 	},
 
 	update: function() {
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
+		interactDispenser.alpha = 0;
+		interact.alpha = 0;
 
 		playerMovement();
-
-		//check overlap between player and dispenser. If 
-		if(checkOverlap(player, dispenser)) {
-			//SHOW E PROMPT
-			if(game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
-				if(match != null && match.exists) {
-					match.kill();
-				}
-			match = new Throwable(game, 250, 500, 'atlas', 'torch', player);
-			game.add.existing(match);
-			match.scale.setTo(0.25, 0.25);
-			match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
-			doorCheck = false;
-			}
-		}
 
 		//when an unlit match overlaps a lit torch, play the animation for a lit match & set doorCheck to true
 		game.physics.arcade.overlap(match, torches, function(){match.animations.play('alight', 10, true); doorCheck = true;}, null, this);
@@ -602,23 +619,60 @@ Stage4.prototype = {
 		//If the match overlaps the sticks, AND the match is on fire, light the sticks on fire and open the door
 		if(match && checkOverlap(match, flick)) {
 			if(doorCheck) {
-				flick.animations.play('alight', 10, true);
+				if(door.frame != 1) {
+					flick.animations.play('alight', 10, true);
+					flick.position.y = flick.position.y - 23; //resetting sprite height
+					unlock.play();
+					fwoosh.play();
+				}
 				door.frame = 1;
 			}
+		}
+
+		//check overlap between player and dispenser. If you press e, pop out a new match and kill the previous match and its interact.
+		if(checkOverlap(player, dispenser)) {
+			interactDispenser.alpha = 1; //show e prompt
+			if(game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
+				match.position.x = 250;
+				match.position.y = 500;
+				match.body.velocity.x = 0;
+				match.body.velocity.y = 0;
+				match.animations.play('off');
+				doorCheck = false;
+			}
+		}
+
+		//if the player and match overlap and the match isnt being held, show the interact prompt
+		if(match && checkOverlap(player, match) && match.isHeld == false) {
+			interact.alpha = 1;
+			interact.position.x = match.position.x;
+			interact.position.y = match.position.y - 20; 
 		}
 
 		if(checkOverlap(player, door) && door.frame == 1){
 			game.state.start('MainMenu');
 		}
 		
-	
+		//DARKNESS STUFF
+		echoDark(); //enabling echolocation ability
+		//erase around the player character
+		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		erase(darkArray, door.position.x, door.position.y, 10, -1);
+		erase(darkArray, 670, 360, 10, -1); //flick bottom
+		erase(darkArray, 670, 230, 10, -1); //flick top
+		if(doorCheck) {
+			erase(darkArray, match.position.x + 5, match.position.y + 10, 2, -1);
+		}
+		if(door.frame == 1) {
+			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
+		}
 	},
 
 	render: function() {
-		game.debug.body(player);
+	/*	game.debug.body(player);
 		if(match){
 			game.debug.body(match);
-		}
+		}*/
 	}
 
 }
