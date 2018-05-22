@@ -1,6 +1,6 @@
 //Development Branch
 var game = new Phaser.Game(800, 600, Phaser.AUTO); // Creates a 800 x 600 screen in which the game is displayed
-var ledge, platforms, torches, player, door, doorCheck;
+var ledge, platforms, torches, player, door, doorCheck, match, flick;
 var fwoosh, unlock, echoSound, echoFill, lookBack;
 var echoAmount = 1; 
 //DARKNESS VARIABLES	
@@ -540,6 +540,7 @@ Stage4.prototype = {
 	create: function() {
 		console.log("Stage4: Create");
 		game.stage.backgroundColor = "#facade";
+		doorCheck = false; //is the torch on fire?
 
 		platforms = game.add.group();
 		platforms.enableBody = true;
@@ -571,19 +572,53 @@ Stage4.prototype = {
 
 		makePlayer();
 
-		//LET'S TRY MAKING SOMETHING THROWABLE (throwable needs to be called AFTER the player is initialized)
-		var match = new Throwable(game, 100, 500, 'atlas', 'gascan', player);
-		game.add.existing(match);
+		//THROWABLE DISPENSER
+		dispenser = game.add.sprite(100, 500, 'atlas', 'gascan');
 	},
 
 	update: function() {
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 
 		playerMovement();
+
+		//check overlap between player and dispenser. If 
+		if(checkOverlap(player, dispenser)) {
+			//SHOW E PROMPT
+			if(game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
+				if(match != null && match.exists) {
+					match.kill();
+				}
+			match = new Throwable(game, 250, 500, 'atlas', 'torch', player);
+			game.add.existing(match);
+			match.scale.setTo(0.25, 0.25);
+			match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
+			doorCheck = false;
+			}
+		}
+
+		//when an unlit match overlaps a lit torch, play the animation for a lit match & set doorCheck to true
+		game.physics.arcade.overlap(match, torches, function(){match.animations.play('alight', 10, true); doorCheck = true;}, null, this);
+
+		//If the match overlaps the sticks, AND the match is on fire, light the sticks on fire and open the door
+		if(match && checkOverlap(match, flick)) {
+			if(doorCheck) {
+				flick.animations.play('alight', 10, true);
+				door.frame = 1;
+			}
+		}
+
+		if(checkOverlap(player, door) && door.frame == 1){
+			game.state.start('MainMenu');
+		}
+		
+	
 	},
 
 	render: function() {
-
+		game.debug.body(player);
+		if(match){
+			game.debug.body(match);
+		}
 	}
 
 }

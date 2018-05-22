@@ -1,5 +1,3 @@
-var justDropped = false;
-var isHeld = false;
 var tempPlayer;
 function Throwable(game, xPos, yPos, key, frame, player) {
 	Phaser.Sprite.call(this, game, xPos, yPos, key, frame);
@@ -10,6 +8,9 @@ function Throwable(game, xPos, yPos, key, frame, player) {
 	this.body.drag.x = 100;
 	this.body.drag.y = 100;
 
+	this.isHeld = false;
+	this.justDropped = false;
+
 	tempPlayer = player;
 }
 
@@ -18,31 +19,32 @@ Throwable.prototype.constructor = Throwable; //Formally sets up the constructor
 
 Throwable.prototype.update = function() {
 	//If you're holding it, press E to not hold it anymore
-	if(isHeld) {
+	if(this.isHeld) {
 		this.body.position.x = tempPlayer.position.x + 10;
 		this.body.position.y = tempPlayer.position.y;
 
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
-			isHeld = false;
-			justDropped = true;
+			this.isHeld = false;
+			this.justDropped = true;
 		}
 	}
 
 	if(game.input.keyboard.justPressed(Phaser.Keyboard.E) == false) {
-		justDropped = false; //A bit of a delay so the item can be dropped
+		this.justDropped = false; //A bit of a delay so the item can be dropped
 	}
 
 	//If you're not holding it, didn't just drop it, & press E with overlap, hold it
-	if(checkOverlap(tempPlayer, this) && isHeld == false && justDropped == false) {
+	if(checkOverlap(tempPlayer, this) && this.isHeld == false && this.justDropped == false) {
 		//play prompt
 		if(game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
-			isHeld = true;
+			this.isHeld = true;
 		}
 	}
 	
-	if(isHeld && game.input.mousePointer.isDown) {
-		isHeld = false;
-		justDropped = true;
+	//throwing
+	if(this.isHeld && game.input.mousePointer.isDown) {
+		this.isHeld = false;
+		this.justDropped = true;
 		game.physics.arcade.moveToPointer(this, 400);
 	}
 
