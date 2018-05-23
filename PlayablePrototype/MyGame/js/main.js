@@ -658,6 +658,94 @@ Stage4.prototype = {
 	}
 }
 
+var Stage5 = function(game) {};
+Stage5.prototype = {
+	preload: function() {
+		console.log("Stage5: Preload");
+		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+		game.load.image('dot', 'assets/img/dot.png');
+
+		game.load.image('wall', 'assets/img/wall.png');
+		game.load.image('ground', 'assets/img/platform.png');
+
+	},
+
+	create: function() {
+		console.log("Stage4: Create");
+		game.stage.backgroundColor = "#facade";
+
+		//Making the maze
+		var makePlats = true;
+		while(makePlats == true) { //MAKING THE PLATFORMS COLLAPSIBLE IN SUBLIME
+			platforms = game.add.group();
+			platforms.enableBody = true;
+			ledge = platforms.create(0, 0, 'wall'); // entrance top
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.4);
+			ledge = platforms.create(0, 350, 'wall'); // entrance bottom
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.4);
+			ledge = platforms.create(150, 100, 'wall'); // vertical to right of entrance, up
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(150, 350, 'wall'); // vertical to right of entrance, down
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(275, 0, 'wall'); // lane 3, up
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(275, 225, 'wall'); //lane 3, down
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(390, 350, 'wall'); // lane 4 down
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.4);
+			ledge = platforms.create(390, 100, 'wall'); // lane 4 up
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(505, 150, 'wall'); // lane 5
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.55);
+			ledge = platforms.create(620, 0, 'wall'); // lane 6
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(140, 100, 'ground'); //row 1
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.35, 0.5);
+			ledge = platforms.create(160, 220, 'ground'); //row 2 left
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.175, 0.5);
+			ledge = platforms.create(525, 220, 'ground'); //row 2 right
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.175, 0.5);
+			ledge = platforms.create(40, 350, 'ground'); //row 3 left
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.175, 0.5);
+			ledge = platforms.create(525, 350, 'ground'); //row 3 right
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.35, 0.5);
+			ledge = platforms.create(160, 440, 'ground'); //row 4
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.175, 0.5);
+
+			makePlats = false;
+		}
+
+		makePlayer();
+	},
+
+	update: function() {
+		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
+
+		playerMovement();
+	},
+
+	render: function() {
+
+	}
+}
+
 //EXTRA FUNCTIONS NEEDED TO MAKE STUFF WORK
 // Source: https://phaser.io/examples/v2/sprites/overlap-without-physics
 function checkOverlap(player, flick) // Sets up boundaries between player and interactable obj.
@@ -828,5 +916,6 @@ game.state.add('Stage1', Stage1);
 game.state.add('Stage2', Stage2);
 game.state.add('Stage3', Stage3);
 game.state.add('Stage4', Stage4);
+game.state.add('Stage5', Stage5);
 //Actually starts the game in our Main Menu state!
-game.state.start('Stage3');
+game.state.start('Stage5');
