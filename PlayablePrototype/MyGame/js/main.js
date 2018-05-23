@@ -758,6 +758,9 @@ Stage5.prototype = {
 		match.scale.setTo(0.25, 0.25);
 		match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
 		match.animations.play('alight', 10, true);
+		//Match interact
+		interact = game.add.sprite(match.position.x, match.position.y - 25, 'atlas', 'e'); //over the match
+		interact.scale.setTo(0.5, 0.5);
 
 		//Door to leave
 		door = game.add.sprite(650, 475, 'door') // Add door
@@ -781,6 +784,12 @@ Stage5.prototype = {
 	update: function() {
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		hitPlatform = game.physics.arcade.collide(match, platforms);
+		interact.alpha = 0;
+		if(match && checkOverlap(player, match) && match.isHeld == false) {
+			interact.alpha = 1;
+			interact.position.x = match.position.x;
+			interact.position.y = match.position.y - 20; 
+		}
 
 		//powerup 1 check
 		if(checkOverlap(player, star) && star.alive) { //picks up the powerup and gains the player 1 life
