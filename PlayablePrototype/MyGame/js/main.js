@@ -632,7 +632,7 @@ Stage4.prototype = {
 		}
 
 		if(checkOverlap(player, door) && door.frame == 1){
-			game.state.start('MainMenu');
+			game.state.start('Stage5');
 		}
 		
 		//DARKNESS STUFF
@@ -665,19 +665,31 @@ Stage5.prototype = {
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 		game.load.image('dot', 'assets/img/dot.png');
+		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation.
 
 		game.load.image('wall', 'assets/img/wall.png');
 		game.load.image('ground', 'assets/img/platform.png');
 
+		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
+
+		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
+		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
+		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
+		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
 	},
 
 	create: function() {
-		console.log("Stage4: Create");
+		console.log("Stage5: Create");
 		game.stage.backgroundColor = "#facade";
+		fwoosh = game.add.audio('fwoosh');
+		unlock = game.add.audio('unlock');
+		echoSound = game.add.audio('echoSound');
+		echoFill = game.add.audio('echoFill');
+		doorCheck = false; //used in this stage mainly to prevent the sprite flying off screen
 
 		//Making the maze
 		var makePlats = true;
-		while(makePlats == true) { //MAKING THE PLATFORMS COLLAPSIBLE IN SUBLIME
+		while(makePlats == true) { //WHILE LOOP TO MAKE THE PLATFORMS COLLAPSIBLE IN SUBLIME
 			platforms = game.add.group();
 			platforms.enableBody = true;
 			ledge = platforms.create(0, 0, 'wall'); // entrance top
@@ -732,13 +744,84 @@ Stage5.prototype = {
 			makePlats = false;
 		}
 
+		//wood pile to burn
+		flick = game.add.sprite(720, 70, 'atlas', 'sticks');
+		flick.scale.setTo(0.5, 0.5);
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
+
 		makePlayer();
+
+		//adding in new torch / flare to throw around
+		match = new Throwable(game, 200, 25, 'atlas', 'torch', player);
+		game.add.existing(match);
+		match.scale.setTo(0.25, 0.25);
+		match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
+		match.animations.play('alight', 10, true);
+
+		//Door to leave
+		door = game.add.sprite(650, 475, 'door') // Add door
+		door.scale.setTo(2, 2);
+		door.anchor.setTo(0.5, 0.5);
+		door.frame = 0;
+
+		//powerup placement
+		star = game.add.sprite(200, 350, 'star'); //adds in powerup in this location
+		star2 = game.add.sprite(500, 50, 'star'); //adds in powerup in this location
+
+		//INITIALIZING DARKNESS STUFF
+		dots = game.add.group();
+		for(var y = 0; y < game.height / dotWidth; y ++) {
+        	for(var x = 0; x < game.width / dotWidth; x ++) {
+        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+        	}
+		}
 	},
 
 	update: function() {
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
+		hitPlatform = game.physics.arcade.collide(match, platforms);
 
+		//powerup 1 check
+		if(checkOverlap(player, star) && star.alive) { //picks up the powerup and gains the player 1 life
+			star.kill();
+			echoAmount++;
+			echoFill.play();
+		}
+		//powerup 2 check
+		if(checkOverlap(player, star2) && star2.alive) { //picks up the powerup and gains the player 1 life
+			star2.kill();
+			echoAmount++;
+			echoFill.play();
+		}
 		playerMovement();
+
+		if(checkOverlap(match, flick)) {
+			match.kill();
+			flick.animations.play('alight', 10, true);
+			if(doorCheck == false) {
+				flick.position.y = flick.position.y - 23; //resetting sprite height
+				unlock.play();
+				fwoosh.play();
+				doorCheck = true;
+			}
+			door.frame = 1;
+		}
+
+		if(checkOverlap(player, door) && door.frame == 1) {
+			game.state.start('MainMenu');
+		}
+
+		//DARKNESS STUFF
+		echoDark(); //enabling echolocation ability
+		//erase around the player character
+		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		if(door.frame == 1) {
+			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
+		}
+		else {
+			erase(darkArray, match.position.x + 10, match.position.y + 15, 2, -1);
+		}
 	},
 
 	render: function() {
