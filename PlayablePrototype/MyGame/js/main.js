@@ -346,6 +346,7 @@ Stage2.prototype = {
 }
 
 /*STAGE 3!!
+* Tutorial stage for throwing objects.
 * We'll leave this up to Nithin to build, since he created it.  
 */
 var Stage3 = function(game) {};
@@ -658,6 +659,9 @@ Stage4.prototype = {
 	}
 }
 
+/*STAGE 5!!
+* Player has to navigate through a maze and carry a torch to a woodpile to open the door.
+*/
 var Stage5 = function(game) {};
 Stage5.prototype = {
 	preload: function() {
@@ -750,6 +754,16 @@ Stage5.prototype = {
 		flick.anchor.setTo(0.5, 0.5);
 		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
 
+		//Door to leave
+		door = game.add.sprite(650, 475, 'door') // Add door
+		door.scale.setTo(2, 2);
+		door.anchor.setTo(0.5, 0.5);
+		door.frame = 0;
+
+		//powerup placement
+		star = game.add.sprite(200, 350, 'star'); //adds in powerup in this location
+		star2 = game.add.sprite(500, 50, 'star'); //adds in powerup in this location
+
 		makePlayer();
 
 		//adding in new torch / flare to throw around
@@ -762,15 +776,6 @@ Stage5.prototype = {
 		interact = game.add.sprite(match.position.x, match.position.y - 25, 'atlas', 'e'); //over the match
 		interact.scale.setTo(0.5, 0.5);
 
-		//Door to leave
-		door = game.add.sprite(650, 475, 'door') // Add door
-		door.scale.setTo(2, 2);
-		door.anchor.setTo(0.5, 0.5);
-		door.frame = 0;
-
-		//powerup placement
-		star = game.add.sprite(200, 350, 'star'); //adds in powerup in this location
-		star2 = game.add.sprite(500, 50, 'star'); //adds in powerup in this location
 
 		//INITIALIZING DARKNESS STUFF
 		dots = game.add.group();
@@ -831,6 +836,97 @@ Stage5.prototype = {
 		else {
 			erase(darkArray, match.position.x + 10, match.position.y + 15, 2, -1);
 		}
+	},
+
+	render: function() {
+
+	}
+}
+
+/*STAGE 6!!
+* Player has to throw two rocks together at a high enough speed over the woodpile to create a spark and open the door.
+*/
+var Stage6 = function(game) {};
+Stage6.prototype = {
+
+	preload: function() {
+		console.log("Stage6: Preload");
+		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+		game.load.image('rock', 'assets/img/tom.png');
+		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
+
+		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
+		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
+		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
+		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
+	},
+
+	create: function() {
+		console.log("Stage6: Create");
+		game.stage.backgroundColor = "#facade";
+		fwoosh = game.add.audio('fwoosh');
+		unlock = game.add.audio('unlock');
+		echoSound = game.add.audio('echoSound');
+		echoFill = game.add.audio('echoFill');
+		doorCheck = false;
+
+		//thing to light on fire
+		flick = game.add.sprite(500, 300, 'atlas', 'sticks');
+		flick.scale.setTo(0.5, 0.5);
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
+
+		door = game.add.sprite(600, 300, 'door') // Add door
+		door.scale.setTo(2, 2);
+		door.anchor.setTo(0.5, 0.5);
+		door.frame = 0;
+
+		makePlayer();
+
+		//adding in the rocks that the player has to throw together
+		rockOne = new Throwable(game, 200, game.height/2, 'rock', null, player);
+		game.add.existing(rockOne);
+		rockTwo = new Throwable(game, 300, game.height/2, 'rock', null, player);
+		game.add.existing(rockTwo);
+	},
+
+	update: function() {
+
+		playerMovement();
+
+		//If the two rocks are stuck together, push them apart so the player can't pick them both up simultaneously
+		if(checkOverlap(rockOne, rockTwo)) {
+			if(rockOne.body.velocity.x == 0 && rockOne.body.velocity.y == 0 && rockTwo.body.velocity.x == 0 && rockTwo.body.velocity.y == 0) {
+				console.log('lmao they be stuck');
+				rockOne.body.velocity.x = 20;
+			}
+		}
+
+		//THE BIG IF STATEMENT FOR WIN CONDITION
+		if(checkOverlap(rockOne, rockTwo)) { //If the two rocks overlap...
+			//at a high enough speed...
+			if(rockOne.body.velocity.x > 70 || rockOne.body.velocity.y > 70 || rockTwo.body.velocity.x > 70 || rockTwo.body.velocity.y > 70) {
+				console.log('Play sparking noise');
+				//over the firewood...
+				if(checkOverlap(rockOne, flick) && checkOverlap(rockTwo, flick)){
+					//You start the fire!!
+					if(doorCheck == false) {
+						if(door.frame != 1) {
+							flick.animations.play('alight', 10, true);
+							flick.position.y = flick.position.y - 23; //resetting sprite height
+							unlock.play();
+							fwoosh.play();
+						}
+					door.frame = 1;
+					doorCheck = true;
+					}
+				}
+			}
+		}
+
+		
+	
 	},
 
 	render: function() {
@@ -1009,5 +1105,6 @@ game.state.add('Stage2', Stage2);
 game.state.add('Stage3', Stage3);
 game.state.add('Stage4', Stage4);
 game.state.add('Stage5', Stage5);
+game.state.add('Stage6', Stage6);
 //Actually starts the game in our Main Menu state!
-game.state.start('Stage5');
+game.state.start('Stage6');

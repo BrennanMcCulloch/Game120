@@ -1,7 +1,11 @@
 var tempPlayer;
 function Throwable(game, xPos, yPos, key, frame, player) {
-	Phaser.Sprite.call(this, game, xPos, yPos, key, frame);
-
+	if(frame != null) {
+		Phaser.Sprite.call(this, game, xPos, yPos, key, frame);
+	}
+	else {
+		Phaser.Sprite.call(this, game, xPos, yPos, key);
+	}
 	game.physics.enable(this);
 	this.body.collideWorldBounds = true;
 	this.body.bounce.set(0.8);
