@@ -860,6 +860,7 @@ Stage6.prototype = {
 		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
 		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
 		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
+		game.load.audio('rockHit', 'assets/audio/rockHit.mp3');
 	},
 
 	create: function() {
@@ -869,6 +870,7 @@ Stage6.prototype = {
 		unlock = game.add.audio('unlock');
 		echoSound = game.add.audio('echoSound');
 		echoFill = game.add.audio('echoFill');
+		rockHit = game.add.audio('rockHit');
 		doorCheck = false;
 
 		//Making the platforms the player and rocks cannot get across
@@ -960,7 +962,7 @@ Stage6.prototype = {
 		if(checkOverlap(rockOne, rockTwo)) { //If the two rocks overlap...
 			//at a high enough speed...
 			if(rockOne.body.velocity.x > 70 || rockOne.body.velocity.y > 70 || rockTwo.body.velocity.x > 70 || rockTwo.body.velocity.y > 70) {
-				console.log('Play sparking noise');
+				rockHit.play(); //Play the rock hitting sound
 				//over the firewood...
 				if(checkOverlap(rockOne, flick) && checkOverlap(rockTwo, flick)){
 					//You start the fire!!
@@ -1197,4 +1199,4 @@ game.state.add('Stage5', Stage5);
 game.state.add('Stage6', Stage6);
 game.state.add('Stage7', Stage7);
 //Actually starts the game in our Main Menu state!
-game.state.start('Stage7');
+game.state.start('Stage6');
