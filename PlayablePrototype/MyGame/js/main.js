@@ -950,7 +950,7 @@ Stage6.prototype = {
 		}
 
 		//If the two rocks are stuck together, push them apart so the player can't pick them both up simultaneously
-		if(checkOverlap(rockOne, rockTwo)) {
+		if(checkOverlap(rockOne, rockTwo) && rockOne.isHeld == false && rockTwo.isHeld == false) {
 			if(rockOne.body.velocity.x == 0 && rockOne.body.velocity.y == 0 && rockTwo.body.velocity.x == 0 && rockTwo.body.velocity.y == 0) {
 				rockOne.body.velocity.x = 20;
 			}
