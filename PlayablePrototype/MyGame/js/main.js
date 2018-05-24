@@ -557,15 +557,21 @@ Stage4.prototype = {
 		ledge = platforms.create(0, 0, 'ground'); // Top of the area border
 		ledge.scale.setTo(2, 1);
 	    ledge.body.immovable = true;
-		ledge = platforms.create(0, 200, 'ground'); // right horizontal wall
-		ledge.scale.setTo(.75, 1);
-	    ledge.body.immovable = true;
-		ledge = platforms.create(0, 32, 'ground'); // left horizontal wall
+
+		ledge = platforms.create(500, 400, 'ground'); // right horizontal wall
 		ledge.scale.setTo(.4, 1);
 	    ledge.body.immovable = true;
-		ledge = platforms.create(game.world.width - 300, 32, 'ground'); // horizontal
-		ledge.scale.setTo(.75, 1);
+		ledge = platforms.create(game.world.width - 300, 32, 'wall'); // right vertical wall
+		ledge.scale.setTo(1, 0.7);
 	    ledge.body.immovable = true;
+
+	    ledge = platforms.create(0, 200, 'ground'); // left horizontal wall
+		ledge.scale.setTo(.4, 1);
+	    ledge.body.immovable = true;
+		ledge = platforms.create(300, 200, 'wall'); // left vertical wall
+		ledge.scale.setTo(1, 0.7);
+	    ledge.body.immovable = true;
+
 		ledge = platforms.create(775, 0, 'wall'); // Right Wall
 		ledge.body.immovable = true;
 		ledge = platforms.create(-25, 0, 'wall'); // Left wall
@@ -589,19 +595,20 @@ Stage4.prototype = {
 		weight.body.drag.y = 100;
 
 		makePlayer();
+		player.position.y = 125;
 
 		//INTERACT PROMPT WITH WEIGHT
 		interact = game.add.sprite(550, game.world.height - 200, 'interact'); // Add interacting key prompt
 
 		echoAmount = 1; //Amount of times player can echolocate
 		star = game.add.sprite(300, 115, 'star'); //adds in powerup in this location
-		// //INITIALIZING DARKNESS STUFF
-		// dots = game.add.group();
-		// for(var y = 0; y < game.height / dotWidth; y ++) {
-  //       	for(var x = 0; x < game.width / dotWidth; x ++) {
-  //       		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
-  //       	}
-		// }
+		//INITIALIZING DARKNESS STUFF
+		dots = game.add.group();
+		for(var y = 0; y < game.height / dotWidth; y ++) {
+        	for(var x = 0; x < game.width / dotWidth; x ++) {
+        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+        	}
+		}
 
 		var QText = this.add.text(player.position.x + 20, player.position.y - 30, "  Q", {font: "15px Comic Sans MS"});
 	},
@@ -659,14 +666,14 @@ Stage4.prototype = {
 		//WIN CONDITIONS
 		if(checkOverlap(player, door) && door.frame == 1) 
 		{
-			game.state.start('Stage4');
+			game.state.start('Stage5');
 		}
 
 
-		// //DARKNESS STUFF
-		// echoDark(); //enabling echolocation ability
-		// //erase around the player character
-		// erase(darkArray, player.position.x, player.position.y, 7, -1);
+		//DARKNESS STUFF
+		echoDark(); //enabling echolocation ability
+		//erase around the player character
+		erase(darkArray, player.position.x, player.position.y, 7, -1);
 	},
 
 	render: function() {
@@ -999,4 +1006,4 @@ game.state.add('Stage2', Stage2);
 game.state.add('Stage3', Stage3);
 game.state.add('Stage4', Stage4);
 //Actually starts the game in our Main Menu state!
-game.state.start('Stage4');
+game.state.start('MainMenu');
