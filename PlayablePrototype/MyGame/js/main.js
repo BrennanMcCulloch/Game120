@@ -502,11 +502,11 @@ Stage3.prototype = {
 	}
 }
 
-/*STAGE 4!!
+/*STAGE 5!!
 * Player has to light a match on fire and throw it into the wood pile across the gap.
 */
-var Stage4 = function(game) {};
-Stage4.prototype = {
+var Stage5 = function(game) {};
+Stage5.prototype = {
 	
 	preload: function() {
 		console.log("Stage4: Preload");
@@ -630,7 +630,7 @@ Stage4.prototype = {
 		}
 
 		if(checkOverlap(player, door) && door.frame == 1){
-			game.state.start('Stage5');
+			game.state.start('Stage6');
 		}
 		
 		//DARKNESS STUFF
@@ -656,11 +656,11 @@ Stage4.prototype = {
 	}
 }
 
-/*STAGE 5!!
+/*STAGE 6!!
 * Player has to navigate through a maze and carry a torch to a woodpile to open the door.
 */
-var Stage5 = function(game) {};
-Stage5.prototype = {
+var Stage6 = function(game) {};
+Stage6.prototype = {
 	preload: function() {
 		console.log("Stage5: Preload");
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
@@ -820,7 +820,7 @@ Stage5.prototype = {
 		}
 
 		if(checkOverlap(player, door) && door.frame == 1) {
-			game.state.start('MainMenu');
+			game.state.start('Stage7');
 		}
 
 		//DARKNESS STUFF
@@ -840,11 +840,11 @@ Stage5.prototype = {
 	}
 }
 
-/*STAGE 6!!
+/*STAGE 7!!
 * Player has to throw two rocks together at a high enough speed over the woodpile to create a spark and open the door.
 */
-var Stage6 = function(game) {};
-Stage6.prototype = {
+var Stage7 = function(game) {};
+Stage7.prototype = {
 
 	preload: function() {
 		console.log("Stage6: Preload");
@@ -982,7 +982,7 @@ Stage6.prototype = {
 
 		//If the doorframe is correct and the player overlaps it, leave
 		if(checkOverlap(player, door) && door.frame == 1) {
-			game.state.start('Stage7');
+			game.state.start('Stage8');
 		}
 	
 		//DARKNESS STUFF
@@ -999,8 +999,8 @@ Stage6.prototype = {
 	}
 }
 
-var Stage7 = function(game) {};
-Stage7.prototype = {
+var Stage8 = function(game) {};
+Stage8.prototype = {
 
 	preload: function() {
 		console.log("Stage7: Preload");
@@ -1194,9 +1194,10 @@ game.state.add('MainMenu', MainMenu);
 game.state.add('Stage1', Stage1);
 game.state.add('Stage2', Stage2);
 game.state.add('Stage3', Stage3);
-game.state.add('Stage4', Stage4);
+
 game.state.add('Stage5', Stage5);
 game.state.add('Stage6', Stage6);
 game.state.add('Stage7', Stage7);
+game.state.add('Stage8', Stage8);
 //Actually starts the game in our Main Menu state!
-game.state.start('Stage6');
+game.state.start('Stage5');
