@@ -29,7 +29,7 @@ MainMenu.prototype = {
 
         //Placing the text for this iteration of the Main Menu over the sky background.
         var hi = 'HI!'
-        var introText = "Welcome to the first playable prototype.\n Press ENTER to begin. "  
+        var introText = "Welcome to the second playable prototype.\n Press ENTER to begin. "  
         var mainMenuText = this.add.text(100, 150, hi, {font: "bold 60px Comic Sans MS"});
         mainMenuText = this.add.text(100, 250, introText, {font: "25px Comic Sans MS"});
     },
@@ -75,12 +75,11 @@ Stage1.prototype = {
 	    game.physics.startSystem(Phaser.Physics.ARCADE); // We're going to be using physics, so enable the Arcade Physics system
 	    game.add.image(0, 0, 'sky'); // A simple background for our game
 		
+		//Making the platforms the player and rocks cannot get across
 		//MAKING THE WORLDBOUNDS THAT WE CANNOT ESCAPE FROM BECAUSE WE ARE DOOMED IN THIS LIFE
 	    platforms = game.add.group(); // The platforms group contains the ground and the 2 ledges we can jump on
 	    platforms.enableBody = true; // We will enable physics for any object that is created in this group
-		
 	    ledge = platforms.create(0, 450, 'ground'); // Here we create the ground.
-	    ledge.scale.setTo(1, 3); // Scale it to fit the width of the game (the original sprite is 400x32 in size)
 	    ledge.body.immovable = true; // This stops it from falling away when you jump on it
 	    ledge = platforms.create(0, 380, 'ground'); // Bottom left of the area border
 		ledge.scale.setTo(0.25, 2);
@@ -88,9 +87,7 @@ Stage1.prototype = {
 	    ledge = platforms.create(600, 380, 'ground'); // Bottom right of the area border
 		ledge.scale.setTo(0.25, 2);
 	    ledge.body.immovable = true;
-		
-		ledge = platforms.create(0, 0, 'ground'); // Top center of the area border
-		ledge.scale.setTo(1, 3);
+		ledge = platforms.create(0, 80, 'ground'); // Top center of the area border
 	    ledge.body.immovable = true;
 	    ledge = platforms.create(0, 100, 'ground'); // Top left of the area border
 		ledge.scale.setTo(0.25, 2);
@@ -112,7 +109,6 @@ Stage1.prototype = {
 		doorCheck = false; //Haven't seen the door yet
 
 		//PLAYER STUFF
-		player = game.add.sprite(50, game.world.height/2, 'bean', 'bean-float-00'); // The player and its settings
 		makePlayer();
 
 		//INTERACT PROMPT
@@ -244,14 +240,13 @@ Stage2.prototype = {
 		door.frame = 0; // Closed door frame
 		doorCheck = false; //IN THIS STAGE, haven't picked up the weight yet
 		
-		weight =  game.add.sprite(550, game.world.height - 150, 'diamond'); // Add weight
+		weight =  game.add.sprite(550, game.world.height - 150, 'atlas', 'gascan'); // Add weight
 		game.physics.arcade.enable(weight); // Apply physics on weight?
+		weight.scale.setTo(0.3, 0.3);
 	    weight.body.collideWorldBounds = true;
 		weight.body.bounce.set(0.8);
 		weight.body.drag.x = 100;
 		weight.body.drag.y = 100;
-		
-		player = game.add.sprite(50, game.world.height/2, 'bean', 'bean-float-00'); // The player and its settings
 
 		makePlayer();
 
@@ -352,6 +347,7 @@ Stage2.prototype = {
 }
 
 /*STAGE 3!!
+* Tutorial stage for throwing objects.
 * We'll leave this up to Nithin to build, since he created it.  
 */
 var Stage3 = function(game) {};
@@ -512,6 +508,7 @@ Stage3.prototype = {
 
 	}
 }
+
 
 /*STAGE 4!!
 * Slightly more complex puzzle that teaches navigation ideas and echolocation mechanic.  
@@ -809,7 +806,7 @@ Stage5.prototype = {
 		}
 
 		if(checkOverlap(player, door) && door.frame == 1){
-			game.state.start('MainMenu');
+			game.state.start('Stage6');
 		}
 		
 		//DARKNESS STUFF
@@ -832,6 +829,375 @@ Stage5.prototype = {
 		if(match){
 			game.debug.body(match);
 		}*/
+	}
+}
+
+/*STAGE 6!!
+* Player has to navigate through a maze and carry a torch to a woodpile to open the door.
+*/
+var Stage6 = function(game) {};
+Stage6.prototype = {
+	preload: function() {
+		console.log("Stage6: Preload");
+		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+		game.load.image('dot', 'assets/img/dot.png');
+		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation.
+
+		game.load.image('wall', 'assets/img/wall.png');
+		game.load.image('ground', 'assets/img/platform.png');
+
+		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
+
+		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
+		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
+		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
+		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
+	},
+
+	create: function() {
+		console.log("Stage6: Create");
+		game.stage.backgroundColor = "#facade";
+		fwoosh = game.add.audio('fwoosh');
+		unlock = game.add.audio('unlock');
+		echoSound = game.add.audio('echoSound');
+		echoFill = game.add.audio('echoFill');
+		doorCheck = false; //used in this stage mainly to prevent the sprite flying off screen
+
+		//Making the maze
+		var makePlats = true;
+		while(makePlats == true) { //WHILE LOOP TO MAKE THE PLATFORMS COLLAPSIBLE IN SUBLIME
+			platforms = game.add.group();
+			platforms.enableBody = true;
+			ledge = platforms.create(0, 0, 'wall'); // entrance top
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.4);
+			ledge = platforms.create(0, 350, 'wall'); // entrance bottom
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.4);
+			ledge = platforms.create(150, 100, 'wall'); // vertical to right of entrance, up
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(150, 350, 'wall'); // vertical to right of entrance, down
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(275, 0, 'wall'); // lane 3, up
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(275, 225, 'wall'); //lane 3, down
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(390, 350, 'wall'); // lane 4 down
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.4);
+			ledge = platforms.create(390, 100, 'wall'); // lane 4 up
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(505, 150, 'wall'); // lane 5
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.55);
+			ledge = platforms.create(620, 0, 'wall'); // lane 6
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.5, 0.2);
+			ledge = platforms.create(140, 100, 'ground'); //row 1
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.35, 0.5);
+			ledge = platforms.create(160, 220, 'ground'); //row 2 left
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.175, 0.5);
+			ledge = platforms.create(525, 220, 'ground'); //row 2 right
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.175, 0.5);
+			ledge = platforms.create(40, 350, 'ground'); //row 3 left
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.175, 0.5);
+			ledge = platforms.create(525, 350, 'ground'); //row 3 right
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.35, 0.5);
+			ledge = platforms.create(160, 440, 'ground'); //row 4
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.175, 0.5);
+
+			makePlats = false;
+		}
+
+		//wood pile to burn
+		flick = game.add.sprite(720, 70, 'atlas', 'sticks');
+		flick.scale.setTo(0.5, 0.5);
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
+
+		//Door to leave
+		door = game.add.sprite(650, 475, 'door') // Add door
+		door.scale.setTo(2, 2);
+		door.anchor.setTo(0.5, 0.5);
+		door.frame = 0;
+
+		//powerup placement
+		star = game.add.sprite(200, 350, 'star'); //adds in powerup in this location
+		star2 = game.add.sprite(500, 50, 'star'); //adds in powerup in this location
+
+		makePlayer();
+
+		//adding in new torch / flare to throw around
+		match = new Throwable(game, 200, 25, 'atlas', 'torch', player);
+		game.add.existing(match);
+		match.scale.setTo(0.25, 0.25);
+		match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
+		match.animations.play('alight', 10, true);
+		//Match interact
+		interact = game.add.sprite(match.position.x, match.position.y - 25, 'atlas', 'e'); //over the match
+		interact.scale.setTo(0.5, 0.5);
+
+
+		//INITIALIZING DARKNESS STUFF
+		dots = game.add.group();
+		for(var y = 0; y < game.height / dotWidth; y ++) {
+        	for(var x = 0; x < game.width / dotWidth; x ++) {
+        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+        	}
+		}
+	},
+
+	update: function() {
+		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
+		hitPlatform = game.physics.arcade.collide(match, platforms);
+		interact.alpha = 0;
+		if(match && checkOverlap(player, match) && match.isHeld == false) {
+			interact.alpha = 1;
+			interact.position.x = match.position.x;
+			interact.position.y = match.position.y - 20; 
+		}
+
+		//powerup 1 check
+		if(checkOverlap(player, star) && star.alive) { //picks up the powerup and gains the player 1 life
+			star.kill();
+			echoAmount++;
+			echoFill.play();
+		}
+		//powerup 2 check
+		if(checkOverlap(player, star2) && star2.alive) { //picks up the powerup and gains the player 1 life
+			star2.kill();
+			echoAmount++;
+			echoFill.play();
+		}
+		playerMovement();
+
+		if(checkOverlap(match, flick)) {
+			match.kill();
+			flick.animations.play('alight', 10, true);
+			if(doorCheck == false) {
+				flick.position.y = flick.position.y - 23; //resetting sprite height
+				unlock.play();
+				fwoosh.play();
+				doorCheck = true;
+			}
+			door.frame = 1;
+		}
+
+		if(checkOverlap(player, door) && door.frame == 1) {
+			game.state.start('Stage7');
+		}
+
+		//DARKNESS STUFF
+		echoDark(); //enabling echolocation ability
+		//erase around the player character
+		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		if(door.frame == 1) {
+			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
+		}
+		else {
+			erase(darkArray, match.position.x + 10, match.position.y + 15, 2, -1);
+		}
+	},
+
+	render: function() {
+
+	}
+}
+
+/*STAGE 7!!
+* Player has to throw two rocks together at a high enough speed over the woodpile to create a spark and open the door.
+*/
+var Stage7 = function(game) {};
+Stage7.prototype = {
+
+	preload: function() {
+		console.log("Stage7: Preload");
+		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+		game.load.image('dot', 'assets/img/dot.png');
+
+		game.load.image('rock', 'assets/img/tom.png');
+		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
+		game.load.image('ground', 'assets/img/platform.png'); // Preload platform
+
+		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
+		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
+		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
+		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
+		game.load.audio('rockHit', 'assets/audio/rockHit.mp3');
+	},
+
+	create: function() {
+		console.log("Stage7: Create");
+		game.stage.backgroundColor = "#facade";
+		fwoosh = game.add.audio('fwoosh');
+		unlock = game.add.audio('unlock');
+		echoSound = game.add.audio('echoSound');
+		echoFill = game.add.audio('echoFill');
+		rockHit = game.add.audio('rockHit');
+		doorCheck = false;
+
+		//Making the platforms the player and rocks cannot get across
+		//MAKING THE WORLDBOUNDS THAT WE CANNOT ESCAPE FROM BECAUSE WE ARE DOOMED IN THIS LIFE
+	    platforms = game.add.group(); // The platforms group contains the ground and the 2 ledges we can jump on
+	    platforms.enableBody = true; // We will enable physics for any object that is created in this group
+	    ledge = platforms.create(0, 450, 'ground'); // Here we create the ground.
+	   // ledge.scale.setTo(1, 3); // Scale it to fit the width of the game (the original sprite is 400x32 in size)
+	    ledge.body.immovable = true; // This stops it from falling away when you jump on it
+	    ledge = platforms.create(0, 380, 'ground'); // Bottom left of the area border
+		ledge.scale.setTo(0.25, 2);
+	    ledge.body.immovable = true;
+	    ledge = platforms.create(600, 380, 'ground'); // Bottom right of the area border
+		ledge.scale.setTo(0.25, 2);
+	    ledge.body.immovable = true;
+		ledge = platforms.create(0, 80, 'ground'); // Top center of the area border
+		//ledge.scale.setTo(1, 3);
+	    ledge.body.immovable = true;
+	    ledge = platforms.create(0, 100, 'ground'); // Top left of the area border
+		ledge.scale.setTo(0.25, 2);
+	    ledge.body.immovable = true;
+	    ledge = platforms.create(600, 100, 'ground'); // Top right of the area border
+		ledge.scale.setTo(0.25, 2);
+	    ledge.body.immovable = true;
+
+		//thing to light on fire
+		flick = game.add.sprite(500, 300, 'atlas', 'sticks');
+		flick.scale.setTo(0.5, 0.5);
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
+
+		door = game.add.sprite(600, 300, 'door') // Add door
+		door.scale.setTo(2, 2);
+		door.anchor.setTo(0.5, 0.5);
+		door.frame = 0;
+
+		makePlayer();
+
+		//adding in the rocks that the player has to throw together
+		rockOne = new Throwable(game, 200, game.height/2, 'rock', null, player);
+		game.add.existing(rockOne);
+		rockTwo = new Throwable(game, 300, game.height/2, 'rock', null, player);
+		game.add.existing(rockTwo);
+
+		//Interact prompts for the rocks
+		interactOne = game.add.sprite(rockOne.position.x + 10, rockOne.position.y - 20, 'atlas', 'e'); //over the match
+		interactOne.scale.setTo(0.5, 0.5);
+		interactTwo = game.add.sprite(rockTwo.position.x + 10, rockTwo.position.y - 20, 'atlas', 'e'); //over the match
+		interactTwo.scale.setTo(0.5, 0.5);
+	
+		//INITIALIZING DARKNESS STUFF
+		dots = game.add.group();
+		for(var y = 0; y < game.height / dotWidth; y ++) {
+        	for(var x = 0; x < game.width / dotWidth; x ++) {
+        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+        	}
+		}
+	},
+
+	update: function() {
+		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
+		hitPlatform = game.physics.arcade.collide(rockOne, platforms);
+		hitPlatform = game.physics.arcade.collide(rockTwo, platforms);
+
+		playerMovement();
+
+		//Interact prompt implementation for both rocks
+		interactOne.alpha = 0;
+		interactOne.position.x = rockOne.position.x + 10;
+		interactOne.position.y = rockOne.position.y - 20;
+		if(checkOverlap(player, rockOne) && rockOne.isHeld == false) {
+			interactOne.alpha = 1;
+		}
+		interactTwo.alpha = 0;
+		interactTwo.position.x = rockTwo.position.x + 10;
+		interactTwo.position.y = rockTwo.position.y - 20;
+		if(checkOverlap(player, rockTwo) && rockTwo.isHeld == false) {
+			interactTwo.alpha = 1;
+		}
+
+		//If the two rocks are stuck together, push them apart so the player can't pick them both up simultaneously
+		if(checkOverlap(rockOne, rockTwo) && rockOne.isHeld == false && rockTwo.isHeld == false) {
+			if(rockOne.body.velocity.x == 0 && rockOne.body.velocity.y == 0 && rockTwo.body.velocity.x == 0 && rockTwo.body.velocity.y == 0) {
+				rockOne.body.velocity.x = 20;
+			}
+		}
+
+		//THE BIG IF STATEMENT FOR WIN CONDITION
+		if(checkOverlap(rockOne, rockTwo)) { //If the two rocks overlap...
+			//at a high enough speed...
+			if(rockOne.body.velocity.x > 70 || rockOne.body.velocity.y > 70 || rockTwo.body.velocity.x > 70 || rockTwo.body.velocity.y > 70) {
+				rockHit.play(); //Play the rock hitting sound
+				//over the firewood...
+				if(checkOverlap(rockOne, flick) && checkOverlap(rockTwo, flick)){
+					//You start the fire!!
+					if(doorCheck == false) {
+						if(door.frame != 1) {
+							flick.animations.play('alight', 10, true);
+							flick.position.y = flick.position.y - 23; //resetting sprite height
+							unlock.play();
+							fwoosh.play();
+						}
+					door.frame = 1;
+					doorCheck = true;
+					}
+				}
+			}
+		}
+
+		//If the doorframe is correct and the player overlaps it, leave
+		if(checkOverlap(player, door) && door.frame == 1) {
+			game.state.start('Stage8');
+		}
+	
+		//DARKNESS STUFF
+		echoDark(); //enabling echolocation ability
+		//erase around the player character
+		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		if(door.frame == 1) {
+			erase(darkArray, flick.position.x, flick.position.y, 7, -1);
+		}
+	},
+
+	render: function() {
+
+	}
+}
+
+var Stage8 = function(game) {};
+Stage8.prototype = {
+
+	preload: function() {
+		console.log("Stage8: Preload");
+		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+	},
+
+	create: function() {
+		console.log("Stage8: Create");
+		game.stage.backgroundColor = "#facade";
+
+		makePlayer();
+	},
+
+	update: function() {
+
+		playerMovement();
+	},
+
+	render: function() {
+
 	}
 }
 
@@ -1005,5 +1371,9 @@ game.state.add('Stage1', Stage1);
 game.state.add('Stage2', Stage2);
 game.state.add('Stage3', Stage3);
 game.state.add('Stage4', Stage4);
+game.state.add('Stage5', Stage5);
+game.state.add('Stage6', Stage6);
+game.state.add('Stage7', Stage7);
+game.state.add('Stage8', Stage8);
 //Actually starts the game in our Main Menu state!
 game.state.start('MainMenu');
