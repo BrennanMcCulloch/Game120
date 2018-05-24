@@ -558,13 +558,13 @@ Stage4.prototype = {
 		ledge.scale.setTo(2, 1);
 	    ledge.body.immovable = true;
 		ledge = platforms.create(0, 200, 'ground'); // right horizontal wall
-		ledge.scale.setTo(.75, 13);
+		ledge.scale.setTo(.75, 1);
 	    ledge.body.immovable = true;
 		ledge = platforms.create(0, 32, 'ground'); // left horizontal wall
-		ledge.scale.setTo(.4, 6);
+		ledge.scale.setTo(.4, 1);
 	    ledge.body.immovable = true;
 		ledge = platforms.create(game.world.width - 300, 32, 'ground'); // horizontal
-		ledge.scale.setTo(.75, 13);
+		ledge.scale.setTo(.75, 1);
 	    ledge.body.immovable = true;
 		ledge = platforms.create(775, 0, 'wall'); // Right Wall
 		ledge.body.immovable = true;
@@ -595,13 +595,13 @@ Stage4.prototype = {
 
 		echoAmount = 1; //Amount of times player can echolocate
 		star = game.add.sprite(300, 115, 'star'); //adds in powerup in this location
-		//INITIALIZING DARKNESS STUFF
-		dots = game.add.group();
-		for(var y = 0; y < game.height / dotWidth; y ++) {
-        	for(var x = 0; x < game.width / dotWidth; x ++) {
-        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
-        	}
-		}
+		// //INITIALIZING DARKNESS STUFF
+		// dots = game.add.group();
+		// for(var y = 0; y < game.height / dotWidth; y ++) {
+  //       	for(var x = 0; x < game.width / dotWidth; x ++) {
+  //       		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+  //       	}
+		// }
 
 		var QText = this.add.text(player.position.x + 20, player.position.y - 30, "  Q", {font: "15px Comic Sans MS"});
 	},
@@ -663,10 +663,10 @@ Stage4.prototype = {
 		}
 
 
-		//DARKNESS STUFF
-		echoDark(); //enabling echolocation ability
-		//erase around the player character
-		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		// //DARKNESS STUFF
+		// echoDark(); //enabling echolocation ability
+		// //erase around the player character
+		// erase(darkArray, player.position.x, player.position.y, 7, -1);
 	},
 
 	render: function() {
@@ -677,11 +677,11 @@ Stage4.prototype = {
 /*STAGE 4!!
 * Player has to light a match on fire and throw it into the wood pile across the gap.
 */
-var Stage4 = function(game) {};
-Stage4.prototype = {
+var Stage5 = function(game) {};
+Stage5.prototype = {
 	
 	preload: function() {
-		console.log("Stage4: Preload");
+		console.log("Stage5: Preload");
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 		game.load.image('dot', 'assets/img/dot.png');
@@ -696,7 +696,7 @@ Stage4.prototype = {
 	},
 	
 	create: function() {
-		console.log("Stage4: Create");
+		console.log("Stage5: Create");
 		fwoosh = game.add.audio('fwoosh');
 		unlock = game.add.audio('unlock');
 		echoSound = game.add.audio('echoSound');
