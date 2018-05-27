@@ -1048,6 +1048,7 @@ Stage7.prototype = {
 		echoFill = game.add.audio('echoFill');
 		rockHit = game.add.audio('rockHit');
 		doorCheck = false;
+		echoAmount = 1;
 
 		//Making the platforms the player and rocks cannot get across
 		//MAKING THE WORLDBOUNDS THAT WE CANNOT ESCAPE FROM BECAUSE WE ARE DOOMED IN THIS LIFE
