@@ -2,6 +2,7 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO); // Creates a 800 x 600 screen in which the game is displayed
 var ledge, platforms, torches, player, door, doorCheck, match, flick;
 var fwoosh, unlock, echoSound, echoFill, lookBack;
+var keys; //enabling key movement
 var echoAmount = 1; 
 //DARKNESS VARIABLES	
 var dots;
@@ -1183,11 +1184,12 @@ Stage8.prototype = {
 		console.log("Stage8: Preload");
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+		game.load.image('sky', 'assets/img/sky.png');
 	},
 
 	create: function() {
 		console.log("Stage8: Create");
-		game.stage.backgroundColor = "#facade";
+		game.add.image(0, 0, 'sky');
 
 		makePlayer();
 	},
@@ -1219,24 +1221,24 @@ function playerMovement() {
 
 	player.body.velocity.x = 0;
 	player.body.velocity.y = 0;
-	if(game.input.keyboard.isDown(Phaser.Keyboard.W)) // Move Up
+	if(game.input.keyboard.isDown(Phaser.Keyboard.W) || keys.up.isDown) // Move Up
 	{
 		player.body.velocity.y = -150;
 		movement = true;
 	}
-	if (game.input.keyboard.isDown(Phaser.Keyboard.A)) // Move to the left
+	if (game.input.keyboard.isDown(Phaser.Keyboard.A) || keys.left.isDown) // Move to the left
 	{
 	    player.body.velocity.x = -150;
 	    player.scale.x = 0.25;
 	    player.play('side');
 	    movement = true;
 	}
-	if(game.input.keyboard.isDown(Phaser.Keyboard.S)) // Move Down
+	if(game.input.keyboard.isDown(Phaser.Keyboard.S) || keys.down.isDown) // Move Down
 	{
 		player.body.velocity.y = 150;
 		movement = true;
 	}
-	if (game.input.keyboard.isDown(Phaser.Keyboard.D)) // Move to the right
+	if (game.input.keyboard.isDown(Phaser.Keyboard.D) || keys.right.isDown) // Move to the right
 	{
 	    player.body.velocity.x = 150;
 	    player.scale.x = -0.25;
@@ -1259,6 +1261,7 @@ function makePlayer() {
 	    player.animations.add('side', Phaser.Animation.generateFrameNames('bean-side-', 0, 15, '', 2));
 	    player.animations.add('grab', Phaser.Animation.generateFrameNames('touch-', 0, 30, '', 2), 30);
 	    player.animations.play('float');
+	    keys = game.input.keyboard.createCursorKeys(); //enabling flash game movement
 }
 
 //EXTRA FUNCTIONS NEEDED TO MAKE DARKNESS WORK
@@ -1377,4 +1380,4 @@ game.state.add('Stage6', Stage6);
 game.state.add('Stage7', Stage7);
 game.state.add('Stage8', Stage8);
 //Actually starts the game in our Main Menu state!
-game.state.start('MainMenu');
+game.state.start('Stage8');
