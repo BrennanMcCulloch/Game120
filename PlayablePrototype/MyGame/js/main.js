@@ -48,8 +48,8 @@ var Stage1 = function(game) {};
 Stage1.prototype = {
 	preload: function() {
 		// preload assets
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json'); //LOAD BEAN
 		game.load.image('dot', 'assets/img/dot.png');
+		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json'); //LOAD BEAN
 		//Loading in the assets we need for this stage, aside from walls
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 
