@@ -21,12 +21,11 @@ var MainMenu = function(game) {};
 MainMenu.prototype = {
     preload: function() {
         console.log('MainMenu: Preload');
-        this.load.image('sky', 'assets/img/sky.png'); //Preloads the only image needed for this menu.
     },
 
     create: function() {
         console.log('MainMenu: Create');
-        this.add.image(0, 0, 'sky');
+        game.stage.backgroundColor = "#facade";
 
         //Placing the text for this iteration of the Main Menu over the sky background.
         var hi = 'HI!'
@@ -366,6 +365,8 @@ Stage3.prototype = {
 	    game.load.image('wall', 'assets/img/wall.png');
 		game.load.image('diamond', 'assets/img/diamond.png'); // Preload weight
 		game.load.image('second', 'assets/img/obj.png'); // Preload object which player interacts with
+		game.load.image('clickDown', 'assets/img/mouseclick.png');
+
 		game.load.spritesheet('interact', 'assets/img/Interact.png', 32, 32); // Preload the key prompt when near interacting obj
 		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
 	
@@ -383,6 +384,9 @@ Stage3.prototype = {
 		game.add.image(0, 0, 'sky'); // A simple background for our game
 		game.physics.startSystem(Phaser.Physics.ARCADE); // We're going to be using physics, so enable the Arcade Physics system
 		
+		var click = game.add.sprite(game.width/2 - 35, 150, 'clickDown');
+		click.scale.setTo(0.75, 0.75);
+
 		//MAKING THE WORLDBOUNDS THAT WE CANNOT ESCAPE FROM BECAUSE WE ARE DOOMED IN THIS LIFE
 	    platforms = game.add.group(); // The platforms group contains the ground and the 2 ledges we can jump on
 	    platforms.enableBody = true; // We will enable physics for any object that is created in this group
@@ -438,8 +442,6 @@ Stage3.prototype = {
         		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
         	}
 		}
-
-		var QText = this.add.text(player.position.x + 20, player.position.y - 30, "  Q", {font: "15px Comic Sans MS"});
 	},
 
 	update: function() {
@@ -690,6 +692,7 @@ Stage5.prototype = {
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 		game.load.image('dot', 'assets/img/dot.png');
+		game.load.image('sky', 'assets/img/sky.png');
 
 		game.load.image('wall', 'assets/img/wall.png');
 		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
@@ -706,7 +709,7 @@ Stage5.prototype = {
 		unlock = game.add.audio('unlock');
 		echoSound = game.add.audio('echoSound');
 		echoFill = game.add.audio('echoFill');
-		game.stage.backgroundColor = "#facade";
+		game.add.image(0, 0, 'sky');
 		doorCheck = false; //is the torch on fire?
 
 		platforms = game.add.group();
@@ -844,6 +847,7 @@ Stage6.prototype = {
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 		game.load.image('dot', 'assets/img/dot.png');
 		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation.
+		game.load.image('sky', 'assets/img/sky.png');
 
 		game.load.image('wall', 'assets/img/wall.png');
 		game.load.image('ground', 'assets/img/platform.png');
@@ -858,7 +862,7 @@ Stage6.prototype = {
 
 	create: function() {
 		console.log("Stage6: Create");
-		game.stage.backgroundColor = "#facade";
+		game.add.image(0, 0, 'sky');
 		fwoosh = game.add.audio('fwoosh');
 		unlock = game.add.audio('unlock');
 		echoSound = game.add.audio('echoSound');
@@ -1028,8 +1032,9 @@ Stage7.prototype = {
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 		game.load.image('dot', 'assets/img/dot.png');
+		game.load.image('sky', 'assets/img/sky.png');
 
-		game.load.image('rock', 'assets/img/tom.png');
+		game.load.image('rock', 'assets/img/rock1.png');
 		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
 		game.load.image('ground', 'assets/img/platform.png'); // Preload platform
 
@@ -1042,7 +1047,7 @@ Stage7.prototype = {
 
 	create: function() {
 		console.log("Stage7: Create");
-		game.stage.backgroundColor = "#facade";
+		game.add.image(0, 0, 'sky');
 		fwoosh = game.add.audio('fwoosh');
 		unlock = game.add.audio('unlock');
 		echoSound = game.add.audio('echoSound');
@@ -1090,8 +1095,10 @@ Stage7.prototype = {
 		//adding in the rocks that the player has to throw together
 		rockOne = new Throwable(game, 200, game.height/2, 'rock', null, player);
 		game.add.existing(rockOne);
+		rockOne.scale.setTo(0.5, 0.5);
 		rockTwo = new Throwable(game, 300, game.height/2, 'rock', null, player);
 		game.add.existing(rockTwo);
+		rockTwo.scale.setTo(0.5, 0.5);
 
 		//Interact prompts for the rocks
 		interactOne = game.add.sprite(rockOne.position.x + 10, rockOne.position.y - 20, 'atlas', 'e'); //over the match
@@ -1188,6 +1195,8 @@ StageEnd.prototype = {
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 		game.load.image('sky', 'assets/img/sky.png');
+		game.load.image('dot', 'assets/img/dot.png');
+		game.load.image('white', 'assets/img/white.png'); //the heavenly void
 	},
 
 	create: function() {
@@ -1195,16 +1204,107 @@ StageEnd.prototype = {
 		game.add.image(0, 0, 'sky');
 
 		this.endCheckOne = false; //Has the player been forcibly moved from stage left to center?
+		this.checkOneVar = 60;
 		this.endCheckTwo = false; //Has the darkness faded away?
+		this.checkTwoVar = 1;
 		this.endCheckThree = false; //Has the player had a bit to look around?
+		this.checkThreeVar = 0;
 		this.endCheckFour = false; //Have we faded to white? 
+		this.checkFourVar = 0;
+		this.endCheckFive = false;
+		this.checkFiveVar = 0;
 
 		makePlayer();
+
+		//INITIALIZING DARKNESS STUFF
+		dots = game.add.group();
+		for(var y = 0; y < game.height / dotWidth; y ++) {
+        	for(var x = 0; x < game.width / dotWidth; x ++) {
+        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+        	}
+		}
+
+		this.white = game.add.image(0, 0, 'white');
+		this.white.alpha = 0;
 	},
 
 	update: function() {
-
 		playerMovement();
+
+		//STEP 1: FORCE THE PLAYER RIGHT
+		if(this.endCheckOne == false && this.endCheckTwo == false && this.endCheckThree == false && this.endCheckFour == false){
+			if(this.checkOneVar < game.width / 2){
+				player.position.x = this.checkOneVar;
+				player.position.y = game.height / 2;
+				this.checkOneVar++;
+			}
+			else {
+				this.endCheckOne = true;
+			}
+		}
+
+		//If the darkness hasn't completely faded out yet, make sure it stays
+		if(this.endCheckTwo == false) {
+			echoDark();
+		}
+
+		//STEP 2: FADE OUT THE DARKNESS ON THE WHOLE STAGE
+		if(this.endCheckOne == true && this.endCheckTwo == false && this.endCheckThree == false && this.endCheckFour == false){
+			if(this.checkTwoVar > 0){
+				for(var y = 0; y < game.height / dotWidth; y ++) {
+        			for(var x = 0; x < game.width / dotWidth; x ++) {
+        				darkArray[x][y].alpha = this.checkTwoVar;
+        			}
+				}
+				this.checkTwoVar = this.checkTwoVar - 0.005;
+			}
+			else {
+				for(var y = 0; y < game.height / dotWidth; y ++) {
+        			for(var x = 0; x < game.width / dotWidth; x ++) {
+        				darkArray[x][y].alpha = 0;
+        			}
+				}
+				this.endCheckTwo = true;
+			}
+		}
+		//erase around the player character
+		erase(darkArray, player.position.x, player.position.y, 7, -1);
+
+		//STEP 3: WAIT A LIL BIT
+		if(this.endCheckOne == true && this.endCheckTwo == true && this.endCheckThree == false && this.endCheckFour == false){
+			if(this.checkThreeVar < 100) {
+				this.checkThreeVar++; //just,,,,,, do nuthin' b
+			}
+			else {
+				this.endCheckThree = true;
+			}
+		}
+
+		//STEP 4: DON'T GO INTO THE LIIIIIIGHT
+		if(this.endCheckOne == true && this.endCheckTwo == true && this.endCheckThree == true && this.endCheckFour == false){
+			if(this.checkFourVar < 1){
+				this.white.alpha = this.checkFourVar;
+				this.checkFourVar = this.checkFourVar + 0.005;
+			}
+			else {
+				this.endCheckFour = true;
+			}
+		}
+
+		//STEP 5: lmao ur in the light
+		if(this.endCheckOne == true && this.endCheckTwo == true && this.endCheckThree == true && this.endCheckFour == true){
+			if(this.checkFiveVar < 100) {
+				this.checkFiveVar++;//just,,,,, do nuthin' again b
+			}
+			else {
+				this.endCheckFive = true;
+			}
+		}
+
+		//STEP 6: GO BACK TO MAIN MENU
+		if(this.endCheckFive) {
+			game.state.start('MainMenu');
+		}
 	},
 
 	render: function() {
@@ -1386,6 +1486,6 @@ game.state.add('Stage4', Stage4);
 game.state.add('Stage5', Stage5);
 game.state.add('Stage6', Stage6);
 game.state.add('Stage7', Stage7);
-game.state.add('StageEnd', Stage8);
+game.state.add('StageEnd', StageEnd);
 //Actually starts the game in our Main Menu state!
-game.state.start('StageEnd');
+game.state.start('MainMenu');
