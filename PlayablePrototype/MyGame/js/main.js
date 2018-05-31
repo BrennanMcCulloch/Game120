@@ -1160,7 +1160,7 @@ Stage7.prototype = {
 
 		//If the doorframe is correct and the player overlaps it, leave
 		if(checkOverlap(player, door) && door.frame == 1) {
-			game.state.start('Stage8');
+			game.state.start('StageEnd');
 		}
 	
 		//DARKNESS STUFF
@@ -1177,8 +1177,11 @@ Stage7.prototype = {
 	}
 }
 
-var Stage8 = function(game) {};
-Stage8.prototype = {
+/*STAGE END!!
+* Artsy Fartsy ending stage where the player can see the full background for a little bit, and then everything fades to white.
+*/
+var StageEnd = function(game) {};
+StageEnd.prototype = {
 
 	preload: function() {
 		console.log("Stage8: Preload");
@@ -1190,6 +1193,11 @@ Stage8.prototype = {
 	create: function() {
 		console.log("Stage8: Create");
 		game.add.image(0, 0, 'sky');
+
+		this.endCheckOne = false; //Has the player been forcibly moved from stage left to center?
+		this.endCheckTwo = false; //Has the darkness faded away?
+		this.endCheckThree = false; //Has the player had a bit to look around?
+		this.endCheckFour = false; //Have we faded to white? 
 
 		makePlayer();
 	},
@@ -1378,6 +1386,6 @@ game.state.add('Stage4', Stage4);
 game.state.add('Stage5', Stage5);
 game.state.add('Stage6', Stage6);
 game.state.add('Stage7', Stage7);
-game.state.add('Stage8', Stage8);
+game.state.add('StageEnd', Stage8);
 //Actually starts the game in our Main Menu state!
-game.state.start('Stage8');
+game.state.start('StageEnd');
