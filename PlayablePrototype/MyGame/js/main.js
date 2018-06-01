@@ -711,6 +711,7 @@ Stage5.prototype = {
 		echoFill = game.add.audio('echoFill');
 		game.add.image(0, 0, 'sky');
 		doorCheck = false; //is the torch on fire?
+		echoAmount = 1; 
 
 		platforms = game.add.group();
 		platforms.enableBody = true;
@@ -868,6 +869,7 @@ Stage6.prototype = {
 		echoSound = game.add.audio('echoSound');
 		echoFill = game.add.audio('echoFill');
 		doorCheck = false; //used in this stage mainly to prevent the sprite flying off screen
+		echoAmount = 1; 
 
 		//Making the maze
 		var makePlats = true;
@@ -1202,6 +1204,7 @@ StageEnd.prototype = {
 	create: function() {
 		console.log("Stage8: Create");
 		game.add.image(0, 0, 'sky');
+		echoAmount = 1; 
 
 		this.endCheckOne = false; //Has the player been forcibly moved from stage left to center?
 		this.checkOneVar = 60;
