@@ -641,8 +641,6 @@ Stage4.prototype = {
         		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
         	}
 		}
-
-		var QText = this.add.text(player.position.x + 20, player.position.y - 30, "  Q", {font: "15px Comic Sans MS"});
 	},
 
 	update: function() {
