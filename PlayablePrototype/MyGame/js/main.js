@@ -4,6 +4,8 @@ var ledge, platforms, torches, player, door, doorCheck, match, flick;
 var fwoosh, unlock, echoSound, echoFill, lookBack;
 var keys; //enabling key movement
 var echoAmount = 1; 
+var credits = "Door unlocking: https://www.youtube.com/watch?v=u9y5G7qTTWM\nFire starting: https://www.youtube.com/watch?v=PC8UOakQuWY\nEcholocation: https://www.youtube.com/watch?v=4GPSM8clbE0\nRocks hitting: https://www.youtube.com/watch?v=pcRXp8NN-m8\nFire loop: https://www.youtube.com/watch?v=Ag1yS48T_Yg";
+var style = { font: "8px Papyrus", fill: "#ffffff"};
 //DARKNESS VARIABLES	
 var dots;
 var dotWidth = 8; //8 for pure darkness, 10 for faux transparency (MUST DIVIDE EVENLY INTO GAME.WIDTH AND GAME.HEIGHT)
@@ -21,23 +23,53 @@ var MainMenu = function(game) {};
 MainMenu.prototype = {
     preload: function() {
         console.log('MainMenu: Preload');
+        game.load.image('title', 'assets/img/title.png');
+        game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json'); //LOAD BEAN
+        game.load.image('ground', 'assets/img/platform.png');
+
+        game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
+        game.load.audio('fire', 'assets/audio/Fire.mp3');
     },
 
     create: function() {
         console.log('MainMenu: Create');
-        game.stage.backgroundColor = "#facade";
+        game.add.image(0, 0, 'title');
+        doorCheck = false; //does the player want to see credits?
 
-        //Placing the text for this iteration of the Main Menu over the sky background.
-        var hi = 'HI!'
-        var introText = "Welcome to the second playable prototype.\n Press ENTER to begin. "  
-        var mainMenuText = this.add.text(100, 150, hi, {font: "bold 60px Comic Sans MS"});
-        mainMenuText = this.add.text(100, 250, introText, {font: "25px Comic Sans MS"});
+        fwoosh = game.add.audio('fwoosh');
+		fwoosh.play();
+		lookBack = game.add.audio('fire');
+		lookBack.volume = 0.3;
+		lookBack.loop = true;
+		lookBack.play();
+
+		//credits text
+		this.MainMenuText = game.add.text(5, 425, credits, style);
+		this.extraText = game.add.text(275, 525, "Press ENTER to toggle credits", {font: "16px Papyrus", fill: "#ffffff", align: "center"});
+
+
+		ledge = game.add.sprite(300, 425, 'ground');
+		ledge.scale.setTo(0.2, 2);
+		ledge.alpha = 0;
+		ledge.inputEnabled = true; //makes it so we can click on it
+		ledge.events.onInputDown.add(function(){game.state.start('Stage1'); lookBack.stop();}, this);  //When you click on the play button, start stage1      
+    
+		makePlayer();
+		player.position.x = game.width/2 - 25;
     },
 
     update: function() {
-        if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
-            game.state.start('Stage1');
-        }
+    	playerMovement();
+
+    	//text stuff
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		doorCheck = !doorCheck;
+    	}
+    	if(doorCheck) {
+    		this.MainMenuText.alpha = 1;
+    	} else {
+    		this.MainMenuText.alpha = 0;
+    	}
     }
 }
 
@@ -681,7 +713,7 @@ Stage4.prototype = {
 	}
 }
 
-/*STAGE 4!!
+/*STAGE 5!!
 * Player has to light a match on fire and throw it into the wood pile across the gap.
 */
 var Stage5 = function(game) {};
