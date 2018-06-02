@@ -291,6 +291,8 @@ Stage2.prototype = {
 
 		QText = game.add.sprite(player.position.x + 20, player.position.y - 20, 'atlas', 'q');
 		QText.scale.setTo(0.5, 0.5);
+		QText = game.add.sprite(450, 150, 'atlas', 'q');
+		QText.scale.setTo(0.5, 0.5);
 
 		
 		//INITIALIZING DARKNESS STUFF
@@ -391,6 +393,9 @@ Stage3.prototype = {
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.image('dot', 'assets/img/dot.png');
 		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation. 
+
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+
 		//in case you start in stage 2
 		game.load.image('sky', 'assets/img/sky.png'); // Preload background
 	    game.load.image('ground', 'assets/img/platform.png'); // Preload platform
@@ -463,7 +468,8 @@ Stage3.prototype = {
 		player.position.y = 150;
 
 		//INTERACT PROMPT WITH WEIGHT
-		interact = game.add.sprite(550, game.world.height - 200, 'interact'); // Add interacting key prompt
+		interact = game.add.sprite(550, game.world.height - 200, 'atlas', 'e'); // Add interacting key prompt
+		interact.scale.setTo(0.5, 0.5);
 
 		echoAmount = 1; //Amount of times player can echolocate
 		star = game.add.sprite(200, 115, 'star'); //adds in powerup in this location
@@ -487,9 +493,9 @@ Stage3.prototype = {
 		}
 
 		//E PROMPT INTERACTION
-		interact.frame = 0; // 1st frame of key prompt is empty space
-		interact.position.x = weight.position.x; //The interact prompt should always appear above the diamond
-		interact.position.y = weight.position.y - 40;
+		interact.alpha = 0; // 1st frame of key prompt is empty space
+		interact.position.x = weight.position.x + 10; //The interact prompt should always appear above the diamond
+		interact.position.y = weight.position.y - 30;
 		// Source: https://phaser.io/examples/v2/sprites/overlap-without-physics
 		if (checkOverlap(weight, flick) && door.frame != 1) // When the weight and the destination overlap
 	    {
@@ -517,7 +523,7 @@ Stage3.prototype = {
 		//PICKING UP THE "WEIGHT"
 		if (checkOverlap(player, weight) && door.frame != 1) // When player overlaps weight
 	    {
-	    	interact.frame = 1;
+	    	interact.alpha = 1;
 			// Source: https://phaser.io/examples/v2/input/follow-mouse
 			if (game.input.keyboard.justPressed(Phaser.Keyboard.E)) // When interact is pressed down
 			{
@@ -556,7 +562,10 @@ Stage4.prototype = {
 		console.log("Stage4: Preload");
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.image('dot', 'assets/img/dot.png');
-		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation. 
+		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation.
+
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+
 		//in case you start in stage 2
 		game.load.image('sky', 'assets/img/sky.png'); // Preload background
 	    game.load.image('ground', 'assets/img/platform.png'); // Preload platform
@@ -630,7 +639,8 @@ Stage4.prototype = {
 		player.position.y = 125;
 
 		//INTERACT PROMPT WITH WEIGHT
-		interact = game.add.sprite(550, game.world.height - 200, 'interact'); // Add interacting key prompt
+		interact = game.add.sprite(550, game.world.height - 200, 'atlas', 'e'); // Add interacting key prompt
+		interact.scale.setTo(0.5, 0.5);
 
 		echoAmount = 1; //Amount of times player can echolocate
 		star = game.add.sprite(300, 115, 'star'); //adds in powerup in this location
@@ -654,9 +664,9 @@ Stage4.prototype = {
 		}
 
 		//E PROMPT INTERACTION
-		interact.frame = 0; // 1st frame of key prompt is empty space
-		interact.position.x = weight.position.x; //The interact prompt should always appear above the diamond
-		interact.position.y = weight.position.y - 40;
+		interact.alpha = 0; // 1st frame of key prompt is empty space
+		interact.position.x = weight.position.x + 10; //The interact prompt should always appear above the diamond
+		interact.position.y = weight.position.y - 30;
 		// Source: https://phaser.io/examples/v2/sprites/overlap-without-physics
 		if (checkOverlap(weight, flick) && door.frame != 1) // When the weight and the destination overlap
 	    {
@@ -684,7 +694,7 @@ Stage4.prototype = {
 		//PICKING UP THE "WEIGHT"
 		if (checkOverlap(player, weight) && door.frame != 1) // When player overlaps weight
 	    {
-	    	interact.frame = 1;
+	    	interact.alpha = 1;
 			// Source: https://phaser.io/examples/v2/input/follow-mouse
 			if (game.input.keyboard.justPressed(Phaser.Keyboard.E)) // When interact is pressed down
 			{
