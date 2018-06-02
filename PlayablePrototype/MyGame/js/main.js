@@ -1209,7 +1209,7 @@ Stage7.prototype = {
 
 		//If the doorframe is correct and the player overlaps it, leave
 		if(checkOverlap(player, door) && door.frame == 1) {
-			game.state.start('StageEnd');
+			game.state.start('Stage8');
 		}
 	
 		//DARKNESS STUFF
@@ -1226,6 +1226,52 @@ Stage7.prototype = {
 	}
 }
 
+/*STAGE 8!!
+* The final stage Nithin's building.
+*/
+var Stage8 = function(game) {};
+Stage8.prototype = {
+	preload: function() {
+		console.log("Stage8: Preload");
+	},
+	create: function() {
+		console.log("Stage8: Create");
+		game.stage.backgroundColor = "#facade";
+
+	},
+	update: function() {
+		if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage9');
+    	}
+	},
+	render: function() {
+
+	}
+}
+
+/*STAGE 9!!
+* The final stage Brennan's building.
+*/
+var Stage9 = function(game) {};
+Stage9.prototype = {
+	preload: function() {
+		console.log("Stage9: Preload");
+	},
+	create: function() {
+		console.log("Stage9: Create");
+		game.stage.backgroundColor = "#800000";
+
+	},
+	update: function() {
+		if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('StageEnd');
+    	}
+	},
+	render: function() {
+
+	}
+}
+
 /*STAGE END!!
 * Artsy Fartsy ending stage where the player can see the full background for a little bit, and then everything fades to white.
 */
@@ -1233,7 +1279,7 @@ var StageEnd = function(game) {};
 StageEnd.prototype = {
 
 	preload: function() {
-		console.log("Stage8: Preload");
+		console.log("StageEnd: Preload");
 		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
 		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
 		game.load.image('sky', 'assets/img/sky.png');
@@ -1242,7 +1288,7 @@ StageEnd.prototype = {
 	},
 
 	create: function() {
-		console.log("Stage8: Create");
+		console.log("StageEnd: Create");
 		game.add.image(0, 0, 'sky');
 		echoAmount = 1; 
 
@@ -1529,6 +1575,8 @@ game.state.add('Stage4', Stage4);
 game.state.add('Stage5', Stage5);
 game.state.add('Stage6', Stage6);
 game.state.add('Stage7', Stage7);
+game.state.add('Stage8', Stage8);
+game.state.add('Stage9', Stage9);
 game.state.add('StageEnd', StageEnd);
 //Actually starts the game in our Main Menu state!
 game.state.start('MainMenu');
