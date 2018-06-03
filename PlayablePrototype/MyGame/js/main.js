@@ -1237,6 +1237,7 @@ Stage8.prototype = {
 	create: function() {
 		console.log("Stage8: Create");
 		game.stage.backgroundColor = "#facade";
+		echoAmount = 1;
 
 	},
 	update: function() {
@@ -1250,22 +1251,237 @@ Stage8.prototype = {
 }
 
 /*STAGE 9!!
-* The final stage Brennan's building.
+* The final stage Brennan's building. Incorporates all of the core mechanics.
 */
 var Stage9 = function(game) {};
 Stage9.prototype = {
 	preload: function() {
 		console.log("Stage9: Preload");
+		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
+		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+		game.load.image('dot', 'assets/img/dot.png');
+		game.load.image('sky', 'assets/img/sky.png');
+		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation.
+		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
+		game.load.image('rock', 'assets/img/rock1.png');
+
+		game.load.image('wall', 'assets/img/wall.png');
+		game.load.image('ground', 'assets/img/platform.png');
+
+		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
+		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
+		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
+		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
+		game.load.audio('rockHit', 'assets/audio/rockHit.mp3');
 	},
 	create: function() {
 		console.log("Stage9: Create");
-		game.stage.backgroundColor = "#800000";
+		game.add.image(0, 0, 'sky');
+		echoAmount = 1;
+		fwoosh = game.add.audio('fwoosh');
+		unlock = game.add.audio('unlock');
+		echoSound = game.add.audio('echoSound');
+		echoFill = game.add.audio('echoFill');
+		rockHit = game.add.audio('rockHit');
+		this.matchOn = false; //Has the match been lit?
+		doorCheck = false; //have you opened the door?
 
+		door = game.add.sprite(500, 300, 'door') // Add door
+		door.scale.setTo(2, 2);
+		door.anchor.setTo(0.5, 0.5);
+		door.frame = 0;
+
+		//sticks to light on fire
+		flick = game.add.sprite(725, 300, 'atlas', 'sticks');
+		flick.scale.setTo(0.5, 0.5);
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
+
+
+		makePlayer();
+		player.position.x = 440;
+		//Creating the platforms of the stage in a while loop so it's collapsible in sublime & I don't have to look at it
+		var makePlats = true;
+		while(makePlats) {
+			platforms = game.add.group();
+			platforms.enableBody = true;
+			ledge = platforms.create(100, 175, 'wall'); // col 1
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.4);
+			ledge = platforms.create(200, 0, 'wall'); // col 2 top
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.2);
+			ledge = platforms.create(200, 250, 'wall'); // col 2 middle
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.2);
+			ledge = platforms.create(200, 500, 'wall'); // col 2 bottom
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.2);
+			ledge = platforms.create(350, 250, 'wall'); // col 3
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.4);
+			ledge = platforms.create(450, 0, 'wall'); // col 4 top
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.2);
+			ledge = platforms.create(450, 500, 'wall'); // col 4 bottom
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.2);
+			ledge = platforms.create(600, 125, 'wall'); // col 5
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.6);
+			ledge = platforms.create(325, 100, 'ground'); // row 1 middle
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.25, 1);
+			ledge = platforms.create(600, 100, 'ground'); // row 1 right
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.25, 1);
+			ledge = platforms.create(125, 210, 'ground'); // row 2
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.15, 1);
+			ledge = platforms.create(200, 350, 'ground'); // row 3
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.2, 1);
+			ledge = platforms.create(350, 460, 'ground'); // row 1 middle
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.23, 1);
+			ledge = platforms.create(600, 460, 'ground'); // row 1 right
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.25, 1);
+
+			makePlats = false;
+		}
+
+		//powerup placement
+		star = game.add.sprite(150, 300, 'star'); //adds in powerup in this location
+		star2 = game.add.sprite(400, 50, 'star'); //adds in powerup in this location
+		star3 = game.add.sprite(650, 550, 'star'); //Adds in powerup in this location
+
+		//adding in the rocks that the player has to throw together
+		rockOne = new Throwable(game, 700, 50, 'rock', null, player);
+		game.add.existing(rockOne);
+		rockOne.scale.setTo(0.5, 0.5);
+		rockTwo = new Throwable(game, 350, 550, 'rock', null, player);
+		game.add.existing(rockTwo);
+		rockTwo.scale.setTo(0.5, 0.5);
+
+		//Making the torch you have to throw the rocks onto to light it
+		match = new Throwable(game, 300, 300, 'atlas', 'torch', player);
+		game.add.existing(match);
+		match.scale.setTo(0.25, 0.25);
+		match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
+		match.animations.add('off', ['torch']); //animation of a single sprite. It's off, b. 
+
+		//Interact prompts for the rocks & match
+		interactOne = game.add.sprite(rockOne.position.x + 10, rockOne.position.y - 20, 'atlas', 'e'); //over the match
+		interactOne.scale.setTo(0.5, 0.5);
+		interactTwo = game.add.sprite(rockTwo.position.x + 10, rockTwo.position.y - 20, 'atlas', 'e'); //over the match
+		interactTwo.scale.setTo(0.5, 0.5);
+		interactThree = game.add.sprite(match.position.x + 10, match.position.y - 20, 'atlas', 'e'); //over the match
+		interactThree.scale.setTo(0.5, 0.5);
+
+		//INITIALIZING DARKNESS STUFF
+		dots = game.add.group();
+		for(var y = 0; y < game.height / dotWidth; y ++) {
+        	for(var x = 0; x < game.width / dotWidth; x ++) {
+        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+        	}
+		}
 	},
 	update: function() {
-		if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
-    		game.state.start('StageEnd');
-    	}
+		var hitPlatform = game.physics.arcade.collide(player, platforms);
+		hitPlatform = game.physics.arcade.collide(rockOne, platforms);
+		hitPlatform = game.physics.arcade.collide(rockTwo, platforms);
+
+		playerMovement();
+
+		//powerup 1 check
+		if(checkOverlap(player, star) && star.alive) { //picks up the powerup and gains the player 1 life
+			star.kill();
+			echoAmount++;
+			echoFill.play();
+		}
+		//powerup 2 check
+		if(checkOverlap(player, star2) && star2.alive) { //picks up the powerup and gains the player 1 life
+			star2.kill();
+			echoAmount++;
+			echoFill.play();
+		}
+		//powerup 3 check
+		if(checkOverlap(player, star3) && star3.alive) { //picks up the powerup and gains the player 1 life
+			star3.kill();
+			echoAmount++;
+			echoFill.play();
+		}
+
+		//Interact prompt implementation for both rocks & the match
+		interactOne.alpha = 0;
+		interactOne.position.x = rockOne.position.x + 10;
+		interactOne.position.y = rockOne.position.y - 20;
+		if(checkOverlap(player, rockOne) && rockOne.isHeld == false) {
+			interactOne.alpha = 1;
+		}
+		interactTwo.alpha = 0;
+		interactTwo.position.x = rockTwo.position.x + 10;
+		interactTwo.position.y = rockTwo.position.y - 20;
+		if(checkOverlap(player, rockTwo) && rockTwo.isHeld == false) {
+			interactTwo.alpha = 1;
+		}
+		interactThree.alpha = 0;
+		interactThree.position.x = match.position.x;
+		interactThree.position.y = match.position.y - 30;
+		if(checkOverlap(player, match) && match.isHeld == false) {
+			interactThree.alpha = 1;
+		}
+
+		//If the two rocks are stuck together, push them apart so the player can't pick them both up simultaneously
+		if(checkOverlap(rockOne, rockTwo) && rockOne.isHeld == false && rockTwo.isHeld == false) {
+			if(rockOne.body.velocity.x == 0 && rockOne.body.velocity.y == 0 && rockTwo.body.velocity.x == 0 && rockTwo.body.velocity.y == 0) {
+				rockOne.body.velocity.x = 20;
+			}
+		}
+
+		//Step 1: collide the rocks over the lamp to light it
+		if(checkOverlap(rockOne, rockTwo)) { //If the two rocks overlap...
+			//at a high enough speed...
+			if(rockOne.body.velocity.x > 70 || rockOne.body.velocity.y > 70 || rockTwo.body.velocity.x > 70 || rockTwo.body.velocity.y > 70) {
+				rockHit.play(); //Play the rock hitting sound
+				//over the matches...
+				if(checkOverlap(rockOne, match) && checkOverlap(rockTwo, match)){
+					match.animations.play('alight', 10, true);
+					this.matchOn = true;
+				}
+			}
+		}
+
+		//Step 2: Throw the lamp over the sticks to light the fire
+		if(checkOverlap(flick, match) && this.matchOn == true){
+			//You start the fire!!
+			if(doorCheck == false) {
+				if(door.frame != 1) {
+					flick.animations.play('alight', 10, true);
+					flick.position.y = flick.position.y - 23; //resetting sprite height
+					unlock.play();
+					fwoosh.play();
+				}
+			door.frame = 1;
+			doorCheck = true;
+			}
+		}
+
+		if(checkOverlap(player, door) && door.frame == 1) {
+			game.state.start('StageEnd');
+		}
+
+		//DARKNESS STUFF
+		echoDark(); //enabling echolocation ability
+		//erase around the player character
+		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		if(door.frame == 1) {
+			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
+		}
+		if(this.matchOn) {
+			erase(darkArray, match.position.x + 10, match.position.y + 15, 2, -1);
+		}
 	},
 	render: function() {
 
@@ -1579,4 +1795,4 @@ game.state.add('Stage8', Stage8);
 game.state.add('Stage9', Stage9);
 game.state.add('StageEnd', StageEnd);
 //Actually starts the game in our Main Menu state!
-game.state.start('MainMenu');
+game.state.start('Stage9');
