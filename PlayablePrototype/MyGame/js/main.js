@@ -45,7 +45,7 @@ MainMenu.prototype = {
 
 		//credits text
 		this.MainMenuText = game.add.text(5, 325, credits, style);
-		this.extraText = game.add.text(275, 525, "Press ENTER to toggle credits", {font: "16px Papyrus", fill: "#ffffff", align: "center"});
+		this.extraText = game.add.text(255, 520, "Press C to toggle credits\nPress ENTER on any stage to restart\nMusic by Jose Beck", {font: "15px Papyrus", fill: "#ffffff", align: "center"});
 
 
 		ledge = game.add.sprite(300, 425, 'ground');
@@ -62,7 +62,7 @@ MainMenu.prototype = {
     	playerMovement();
 
     	//text stuff
-    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.C)) {
     		doorCheck = !doorCheck;
     	}
     	if(doorCheck) {
