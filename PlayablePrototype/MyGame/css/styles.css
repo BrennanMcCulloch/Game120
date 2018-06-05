@@ -1,3 +1,12 @@
 body {
-	font-family: Helvetica;
+	font-family: Papyrus;
+	background-color: black; 
+	color: #ff8777;
+	text-align: center;
+}
+
+canvas {
+	border: 8px solid #4CA4AA;
+	margin-left: auto;
+	margin-right: auto;
 }

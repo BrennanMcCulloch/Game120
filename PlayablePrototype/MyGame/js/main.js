@@ -5,7 +5,7 @@ var fwoosh, unlock, echoSound, echoFill, lookBack;
 var keys; //enabling key movement
 var echoAmount = 1; 
 var credits = "Door unlocking: https://www.youtube.com/watch?v=u9y5G7qTTWM\nFire starting: https://www.youtube.com/watch?v=PC8UOakQuWY\nEcholocation: https://www.youtube.com/watch?v=4GPSM8clbE0\nRocks hitting: https://www.youtube.com/watch?v=pcRXp8NN-m8\nFire loop: https://www.youtube.com/watch?v=Ag1yS48T_Yg";
-var style = { font: "8px Papyrus", fill: "#ffffff"};
+var style = { font: "10px Papyrus", fill: "#ffffff"};
 //DARKNESS VARIABLES	
 var dots;
 var dotWidth = 8; //8 for pure darkness, 10 for faux transparency (MUST DIVIDE EVENLY INTO GAME.WIDTH AND GAME.HEIGHT)
@@ -44,7 +44,7 @@ MainMenu.prototype = {
 		lookBack.play();
 
 		//credits text
-		this.MainMenuText = game.add.text(5, 425, credits, style);
+		this.MainMenuText = game.add.text(5, 325, credits, style);
 		this.extraText = game.add.text(275, 525, "Press ENTER to toggle credits", {font: "16px Papyrus", fill: "#ffffff", align: "center"});
 
 
@@ -1795,4 +1795,4 @@ game.state.add('Stage8', Stage8);
 game.state.add('Stage9', Stage9);
 game.state.add('StageEnd', StageEnd);
 //Actually starts the game in our Main Menu state!
-game.state.start('Stage9');
+game.state.start('MainMenu');
