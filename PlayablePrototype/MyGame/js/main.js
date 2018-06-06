@@ -68,7 +68,7 @@ Preloading.prototype = {
 	},
 
 	create: function() {
-		game.state.start('Stage7');
+		game.state.start('MainMenu');
 	}
 
 }
