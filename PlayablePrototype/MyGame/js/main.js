@@ -2,9 +2,10 @@
 var game = new Phaser.Game(800, 600, Phaser.AUTO); // Creates a 800 x 600 screen in which the game is displayed
 var ledge, platforms, torches, player, door, doorCheck, match, flick;
 var fwoosh, unlock, echoSound, echoFill, lookBack;
+var music, whispers, fireWhispers;
 var keys; //enabling key movement
 var echoAmount = 1; 
-var credits = "Door unlocking: https://www.youtube.com/watch?v=u9y5G7qTTWM\nFire starting: https://www.youtube.com/watch?v=PC8UOakQuWY\nEcholocation: https://www.youtube.com/watch?v=4GPSM8clbE0\nRocks hitting: https://www.youtube.com/watch?v=pcRXp8NN-m8\nFire loop: https://www.youtube.com/watch?v=Ag1yS48T_Yg";
+var credits = "Door unlocking: https://www.youtube.com/watch?v=u9y5G7qTTWM\nFire starting: https://www.youtube.com/watch?v=PC8UOakQuWY\nEcholocation: https://www.youtube.com/watch?v=4GPSM8clbE0\nRocks hitting: https://www.youtube.com/watch?v=pcRXp8NN-m8";
 var style = { font: "10px Papyrus", fill: "#ffffff"};
 //DARKNESS VARIABLES	
 var dots;
@@ -16,6 +17,62 @@ for(var i = 0; i < game.width/dotWidth; i++){
 }
 var echoX, echoY, echoRad, echoRadder, echoOn;
 
+var Booting = function(game) {};
+Booting.prototype = {
+	preload: function() {
+		game.load.image('ground', 'assets/img/platform.png');
+	},
+
+	create: function() {
+		game.state.start('Preloading');
+	}
+
+}
+
+var Preloading = function(game) {};
+Preloading.prototype = {
+	preload: function() {
+		this.loadingBar = this.add.sprite(game.width / 2, game.height / 2, 'ground');
+		this.loadingBar.anchor.setTo(0.5, 0.5);
+		this.load.setPreloadSprite(this.loadingBar);
+
+		//CORE ASSETS
+        game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json'); //LOAD BEAN
+        game.load.image('dot', 'assets/img/dot.png');
+
+        //ATLASES
+        game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+
+        //ENCVIRONMENTAL ASSETS
+        game.load.image('title', 'assets/img/title.png');
+        game.load.image('sky', 'assets/img/sky.png'); // Preload background
+        game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
+        game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation.
+        game.load.image('wall', 'assets/img/wall.png');
+        game.load.image('clickDown', 'assets/img/mouseclick.png');
+        game.load.image('rock', 'assets/img/rock1.png');
+        game.load.image('white', 'assets/img/white.png'); //the heavenly void
+
+        //AUDIO ASSETS
+        game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
+        game.load.audio('fire', 'assets/audio/Fire.wav');
+        game.load.audio('unlock', 'assets/audio/Unlock.mp3');
+		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
+		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
+		game.load.audio('lookBack', 'assets/audio/lookBack.mp3');
+		game.load.audio('rockHit', 'assets/audio/rockHit.mp3');
+
+		//TEMP ASSETS
+		game.load.image('diamond', 'assets/img/diamond.png'); // Preload weight
+		game.load.image('second', 'assets/img/obj.png'); // Preload object which player interacts with
+	},
+
+	create: function() {
+		game.state.start('MainMenu');
+	}
+
+}
+
 /*OPENING MAIN MENU!!
 * Shows the player the title and prompts them to press enter to play. 
 */
@@ -23,12 +80,6 @@ var MainMenu = function(game) {};
 MainMenu.prototype = {
     preload: function() {
         console.log('MainMenu: Preload');
-        game.load.image('title', 'assets/img/title.png');
-        game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json'); //LOAD BEAN
-        game.load.image('ground', 'assets/img/platform.png');
-
-        game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
-        game.load.audio('fire', 'assets/audio/Fire.mp3');
     },
 
     create: function() {
@@ -38,10 +89,10 @@ MainMenu.prototype = {
 
         fwoosh = game.add.audio('fwoosh');
 		fwoosh.play();
-		lookBack = game.add.audio('fire');
-		lookBack.volume = 0.3;
-		lookBack.loop = true;
-		lookBack.play();
+		fireWhispers = game.add.audio('fire');
+		fireWhispers.volume = 0.3;
+		fireWhispers.loop = true;
+		fireWhispers.play();
 
 		//credits text
 		this.MainMenuText = game.add.text(5, 325, credits, style);
@@ -52,7 +103,7 @@ MainMenu.prototype = {
 		ledge.scale.setTo(0.2, 2);
 		ledge.alpha = 0;
 		ledge.inputEnabled = true; //makes it so we can click on it
-		ledge.events.onInputDown.add(function(){game.state.start('Stage1'); lookBack.stop();}, this);  //When you click on the play button, start stage1      
+		ledge.events.onInputDown.add(function(){game.state.start('Stage1'); fireWhispers.stop();}, this);  //When you click on the play button, start stage1      
     
 		makePlayer();
 		player.position.x = game.width/2 - 25;
@@ -79,21 +130,7 @@ MainMenu.prototype = {
 var Stage1 = function(game) {};
 Stage1.prototype = {
 	preload: function() {
-		// preload assets
-		game.load.image('dot', 'assets/img/dot.png');
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json'); //LOAD BEAN
-		//Loading in the assets we need for this stage, aside from walls
-		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
-
 		console.log('Stage1: Preload');
-		game.load.image('sky', 'assets/img/sky.png'); // Preload background
-	    game.load.image('ground', 'assets/img/platform.png'); // Preload platform
-		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
-	
-		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
-		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
-		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
-		game.load.audio('lookBack', 'assets/audio/lookBack.mp3');
 	},
 
 	create: function() {
@@ -222,22 +259,6 @@ Stage2.prototype = {
 	preload: function() {
 		//Note: once preloaded in one state, a sprite does not need to be preloaded in any other states. 
 		console.log("Stage2: Preload");
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
-		game.load.image('dot', 'assets/img/dot.png');
-		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation. 
-		//in case you start in stage 2
-
-		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
-
-		game.load.image('sky', 'assets/img/sky.png'); // Preload background
-	    game.load.image('ground', 'assets/img/platform.png'); // Preload platform
-	    game.load.image('wall', 'assets/img/wall.png');
-		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
-	
-		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
-		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
-		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
-		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
 	},
 
 	create: function() {
@@ -398,26 +419,6 @@ Stage3.prototype = {
 	preload: function() {
 		//Note: once preloaded in one state, a sprite does not need to be preloaded in any other states. 
 		console.log("Stage3: Preload");
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
-		game.load.image('dot', 'assets/img/dot.png');
-		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation. 
-
-		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
-
-		//in case you start in stage 2
-		game.load.image('sky', 'assets/img/sky.png'); // Preload background
-	    game.load.image('ground', 'assets/img/platform.png'); // Preload platform
-	    game.load.image('wall', 'assets/img/wall.png');
-		game.load.image('diamond', 'assets/img/diamond.png'); // Preload weight
-		game.load.image('second', 'assets/img/obj.png'); // Preload object which player interacts with
-		game.load.image('clickDown', 'assets/img/mouseclick.png');
-
-		game.load.spritesheet('interact', 'assets/img/Interact.png', 32, 32); // Preload the key prompt when near interacting obj
-		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
-	
-		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
-		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
-		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
 	},
 
 	create: function() {
@@ -572,24 +573,6 @@ Stage4.prototype = {
 	preload: function() {
 		//Note: once preloaded in one state, a sprite does not need to be preloaded in any other states. 
 		console.log("Stage4: Preload");
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
-		game.load.image('dot', 'assets/img/dot.png');
-		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation.
-
-		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
-
-		//in case you start in stage 2
-		game.load.image('sky', 'assets/img/sky.png'); // Preload background
-	    game.load.image('ground', 'assets/img/platform.png'); // Preload platform
-	    game.load.image('wall', 'assets/img/wall.png');
-		game.load.image('diamond', 'assets/img/diamond.png'); // Preload weight
-		game.load.image('second', 'assets/img/obj.png'); // Preload object which player interacts with
-		game.load.spritesheet('interact', 'assets/img/Interact.png', 32, 32); // Preload the key prompt when near interacting obj
-		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
-	
-		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
-		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
-		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
 	},
 
 	create: function() {
@@ -745,18 +728,6 @@ Stage5.prototype = {
 	
 	preload: function() {
 		console.log("Stage5: Preload");
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
-		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
-		game.load.image('dot', 'assets/img/dot.png');
-		game.load.image('sky', 'assets/img/sky.png');
-
-		game.load.image('wall', 'assets/img/wall.png');
-		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
-
-		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
-		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
-		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
-		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
 	},
 	
 	create: function() {
@@ -904,21 +875,6 @@ var Stage6 = function(game) {};
 Stage6.prototype = {
 	preload: function() {
 		console.log("Stage6: Preload");
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
-		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
-		game.load.image('dot', 'assets/img/dot.png');
-		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation.
-		game.load.image('sky', 'assets/img/sky.png');
-
-		game.load.image('wall', 'assets/img/wall.png');
-		game.load.image('ground', 'assets/img/platform.png');
-
-		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
-
-		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
-		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
-		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
-		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
 	},
 
 	create: function() {
@@ -1095,20 +1051,6 @@ Stage7.prototype = {
 
 	preload: function() {
 		console.log("Stage7: Preload");
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
-		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
-		game.load.image('dot', 'assets/img/dot.png');
-		game.load.image('sky', 'assets/img/sky.png');
-
-		game.load.image('rock', 'assets/img/rock1.png');
-		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
-		game.load.image('ground', 'assets/img/platform.png'); // Preload platform
-
-		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
-		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
-		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
-		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
-		game.load.audio('rockHit', 'assets/audio/rockHit.mp3');
 	},
 
 	create: function() {
@@ -1285,22 +1227,6 @@ var Stage9 = function(game) {};
 Stage9.prototype = {
 	preload: function() {
 		console.log("Stage9: Preload");
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
-		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
-		game.load.image('dot', 'assets/img/dot.png');
-		game.load.image('sky', 'assets/img/sky.png');
-		game.load.image('star', 'assets/img/star.png'); //Powerup that gives you 1 more echolocation.
-		game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
-		game.load.image('rock', 'assets/img/rock1.png');
-
-		game.load.image('wall', 'assets/img/wall.png');
-		game.load.image('ground', 'assets/img/platform.png');
-
-		game.load.audio('unlock', 'assets/audio/Unlock.mp3');
-		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
-		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
-		game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
-		game.load.audio('rockHit', 'assets/audio/rockHit.mp3');
 	},
 	create: function() {
 		console.log("Stage9: Create");
@@ -1528,11 +1454,6 @@ StageEnd.prototype = {
 
 	preload: function() {
 		console.log("StageEnd: Preload");
-		game.load.atlas('bean', 'assets/img/bean.png', 'assets/img/bean.json');
-		game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
-		game.load.image('sky', 'assets/img/sky.png');
-		game.load.image('dot', 'assets/img/dot.png');
-		game.load.image('white', 'assets/img/white.png'); //the heavenly void
 	},
 
 	create: function() {
@@ -1815,6 +1736,8 @@ function echoDark() {
 }
 
 //Adds all of the game states to the game so that we can switch between them. 
+game.state.add('Booting', Booting);
+game.state.add('Preloading', Preloading);
 game.state.add('MainMenu', MainMenu);
 game.state.add('Stage1', Stage1);
 game.state.add('Stage2', Stage2);
@@ -1827,4 +1750,4 @@ game.state.add('Stage8', Stage8);
 game.state.add('Stage9', Stage9);
 game.state.add('StageEnd', StageEnd);
 //Actually starts the game in our Main Menu state!
-game.state.start('MainMenu');
+game.state.start('Booting');
