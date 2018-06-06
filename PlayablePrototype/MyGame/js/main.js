@@ -68,7 +68,7 @@ Preloading.prototype = {
 	},
 
 	create: function() {
-		game.state.start('MainMenu');
+		game.state.start('Stage7');
 	}
 
 }
@@ -1204,16 +1204,147 @@ Stage8.prototype = {
 	preload: function() {
 		console.log("Stage8: Preload");
 	},
+
 	create: function() {
 		console.log("Stage8: Create");
-		game.stage.backgroundColor = "#facade";
-		echoAmount = 1;
+		game.add.image(0, 0, 'sky');
+		fwoosh = game.add.audio('fwoosh');
+		unlock = game.add.audio('unlock');
+		echoSound = game.add.audio('echoSound');
+		echoFill = game.add.audio('echoFill');
+		doorCheck = false; //used in this stage mainly to prevent the sprite flying off screen
+		echoAmount = 1; 
 
+
+		//Making the maze
+		var makePlats = true;
+		while(makePlats == true) { //WHILE LOOP TO MAKE THE PLATFORMS COLLAPSIBLE IN SUBLIME
+			platforms = game.add.group();
+			platforms.enableBody = true;
+			ledge = platforms.create(0, 0, 'wall'); // entrance top
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.4);
+			ledge = platforms.create(0, 350, 'wall'); // entrance bottom
+			ledge.body.immovable = true;
+			ledge.scale.setTo(1, 0.4);
+			ledge = platforms.create(140, 110, 'wall'); // left wall box
+			ledge.body.immovable = true;
+			ledge.scale.setTo(.5, 0.6);
+			ledge = platforms.create(657, 110, 'wall'); // right wall box
+			ledge.body.immovable = true;
+			ledge.scale.setTo(.5, 0.6);
+			ledge = platforms.create(320, 225, 'wall'); // left wall box inside
+			ledge.body.immovable = true;
+			ledge.scale.setTo(.5, 0.4);
+			ledge = platforms.create(480, 225, 'wall'); // right wall box inside
+			ledge.body.immovable = true;
+			ledge.scale.setTo(.5, 0.4);
+			ledge = platforms.create(140, 110, 'ground'); //upper ground box
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.68, 0.5);
+			ledge = platforms.create(145, 440, 'ground'); //lower ground box left
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.25, 0.5);
+			ledge = platforms.create(480, 440, 'ground'); //lower ground box right
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.25, 0.5);
+			ledge = platforms.create(240, 225, 'wall'); // left wall box inside 2
+			ledge.body.immovable = true;
+			ledge.scale.setTo(.5, 0.2);
+			ledge = platforms.create(560, 225, 'wall'); // right wall box inside 2
+			ledge.body.immovable = true;
+			ledge.scale.setTo(.5, 0.2);
+			ledge = platforms.create(240, 225, 'ground'); //lower ground box left 2
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.13, 0.5);
+			ledge = platforms.create(480, 225, 'ground'); //lower ground box right 2
+			ledge.body.immovable = true;
+			ledge.scale.setTo(0.13, 0.5);
+			makePlats = false;
+		}
+
+		//wood pile to burn
+		flick = game.add.sprite(110, 50, 'atlas', 'sticks');
+		flick.scale.setTo(0.5, 0.5);
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
+
+		//Door to leave
+		door = game.add.sprite(705, 500, 'door') // Add door
+		door.scale.setTo(2, 2);
+		door.anchor.setTo(0.5, 0.5);
+		door.frame = 0;
+
+		//powerup placement
+		star = game.add.sprite(515, 275, 'star'); //adds in powerup in this location
+
+		makePlayer();
+
+		//adding in new torch / flare to throw around
+		match = new Throwable(game, 285, 260, 'atlas', 'torch', player);
+		game.add.existing(match);
+		match.scale.setTo(0.25, 0.25);
+		match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
+		match.animations.play('alight', 10, true);
+		//Match interact
+		interact = game.add.sprite(match.position.x, match.position.y - 25, 'atlas', 'e'); //over the match
+		interact.scale.setTo(0.5, 0.5);
+
+
+		//INITIALIZING DARKNESS STUFF
+		dots = game.add.group();
+		for(var y = 0; y < game.height / dotWidth; y ++) {
+        	for(var x = 0; x < game.width / dotWidth; x ++) {
+        		darkArray[x][y] = dots.create(x*dotWidth, y*dotWidth, 'dot');
+        	}
+		}
 	},
+
 	update: function() {
-		if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
-    		game.state.start('Stage9');
-    	}
+		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
+		hitPlatform = game.physics.arcade.collide(match, platforms);
+		interact.alpha = 0;
+		if(match && checkOverlap(player, match) && match.isHeld == false) {
+			interact.alpha = 1;
+			interact.position.x = match.position.x;
+			interact.position.y = match.position.y - 20; 
+		}
+
+		//powerup 1 check
+		if(checkOverlap(player, star) && star.alive) { //picks up the powerup and gains the player 1 life
+			star.kill();
+			echoAmount++;
+			echoFill.play();
+		}
+		
+		playerMovement();
+
+		if(checkOverlap(match, flick)) {
+			match.kill();
+			flick.animations.play('alight', 10, true);
+			if(doorCheck == false) {
+				flick.position.y = flick.position.y - 23; //resetting sprite height
+				unlock.play();
+				fwoosh.play();
+				doorCheck = true;
+			}
+			door.frame = 1;
+		}
+
+		if(checkOverlap(player, door) && door.frame == 1) {
+			game.state.start('Stage9');
+		}
+
+		//DARKNESS STUFF
+		echoDark(); //enabling echolocation ability
+		//erase around the player character
+		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		if(door.frame == 1) {
+			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
+		}
+		else {
+			erase(darkArray, match.position.x + 10, match.position.y + 15, 2, -1);
+		}
 	},
 	render: function() {
 
