@@ -161,6 +161,10 @@ Stage1.prototype = {
 	},
 
 	update: function() {
+		//Restart the stage
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage1');
+    	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		
 	   	playerMovement();
@@ -306,6 +310,10 @@ Stage2.prototype = {
 	},
 
 	update: function() {
+		//Restart the stage
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage2');
+    	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		var hitPlatform3 = game.physics.arcade.collide(weight, platforms); // Apply colliding physics between weight and platforms
 		playerMovement();
@@ -483,6 +491,10 @@ Stage3.prototype = {
 	},
 
 	update: function() {
+		//Restart the stage
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage3');
+    	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		var hitPlatform3 = game.physics.arcade.collide(weight, platforms); // Apply colliding physics between weight and platforms
 		playerMovement();
@@ -654,6 +666,10 @@ Stage4.prototype = {
 	},
 
 	update: function() {
+		//Restart the stage
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage4');
+    	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		var hitPlatform3 = game.physics.arcade.collide(weight, platforms); // Apply colliding physics between weight and platforms
 		playerMovement();
@@ -808,6 +824,10 @@ Stage5.prototype = {
 	},
 
 	update: function() {
+		//Restart the stage
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage5');
+    	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		interactDispenser.alpha = 0;
 		interact.alpha = 0;
@@ -1007,6 +1027,10 @@ Stage6.prototype = {
 	},
 
 	update: function() {
+		//Restart the stage
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage6');
+    	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		hitPlatform = game.physics.arcade.collide(match, platforms);
 		interact.alpha = 0;
@@ -1158,6 +1182,10 @@ Stage7.prototype = {
 	},
 
 	update: function() {
+		//Restart the stage
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage7');
+    	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		hitPlatform = game.physics.arcade.collide(rockOne, platforms);
 		hitPlatform = game.physics.arcade.collide(rockTwo, platforms);
@@ -1388,6 +1416,10 @@ Stage9.prototype = {
 		}
 	},
 	update: function() {
+		//Restart the stage
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage9');
+    	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms);
 		hitPlatform = game.physics.arcade.collide(rockOne, platforms);
 		hitPlatform = game.physics.arcade.collide(rockTwo, platforms);
