@@ -57,6 +57,8 @@ Preloading.prototype = {
         //AUDIO ASSETS
         game.load.audio('fwoosh', 'assets/audio/Fwoosh.mp3');
         game.load.audio('fire', 'assets/audio/Fire.wav');
+        game.load.audio('whispers', 'assets/audio/Whispers.wav');
+        game.load.audio('music', 'assets/audio/Music.wav');
         game.load.audio('unlock', 'assets/audio/Unlock.mp3');
 		game.load.audio('echoSound', 'assets/audio/echoSound.mp3');
 		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
@@ -69,7 +71,18 @@ Preloading.prototype = {
 	},
 
 	create: function() {
-		game.state.start('MainMenu');
+		//To get rid of debugging problems
+		fireWhispers = game.add.audio('fire');
+		fireWhispers.volume = 0.5;
+		fireWhispers.loop = true;
+		music = game.add.audio('music');
+		music.volume = 0.3;
+		music.loop = true;
+		whispers = game.add.audio('whispers');
+		whispers.volume = 0.5;
+		whispers.loop = true;
+
+		game.state.start('Stage9');
 	}
 
 }
@@ -91,9 +104,21 @@ MainMenu.prototype = {
         fwoosh = game.add.audio('fwoosh');
 		fwoosh.play();
 		fireWhispers = game.add.audio('fire');
-		fireWhispers.volume = 0.3;
+		fireWhispers.volume = 0.5;
 		fireWhispers.loop = true;
 		fireWhispers.play();
+
+		//setting up music
+		if(music && whispers) {
+			music.stop();
+			whispers.stop();
+		}
+		music = game.add.audio('music');
+		music.volume = 0.3;
+		music.loop = true;
+		whispers = game.add.audio('whispers');
+		whispers.volume = 0.5;
+		whispers.loop = true;
 
 		flick = game.add.sprite(305, 225, 'atlasTwo', 'fire-00'); // Add interactable obj
 		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-', 0, 5, '', 2));
@@ -109,7 +134,7 @@ MainMenu.prototype = {
 		ledge.scale.setTo(0.2, 2);
 		ledge.alpha = 0;
 		ledge.inputEnabled = true; //makes it so we can click on it
-		ledge.events.onInputDown.add(function(){game.state.start('Stage1'); fireWhispers.stop();}, this);  //When you click on the play button, start stage1      
+		ledge.events.onInputDown.add(function(){game.state.start('Stage1'); fireWhispers.stop(); music.play(); whispers.play();}, this);  //When you click on the play button, start stage1      
     
 		makePlayer();
 		player.position.x = game.width/2 - 25;
@@ -207,6 +232,7 @@ Stage1.prototype = {
 		//Restart the stage
     	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
     		game.state.start('Stage1');
+    		fireWhispers.stop();
     	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		
@@ -228,6 +254,7 @@ Stage1.prototype = {
 				door.frame = 1; // Change door sprite into "open" frame
 				unlock.play();
 				fwoosh.play();
+				fireWhispers.play();
 				flick.animations.play('alight', 10, true);
 				flick.position.y = flick.position.y - 19; //resetting sprite height
 			}
@@ -237,6 +264,7 @@ Stage1.prototype = {
 		if(checkOverlap(player, door) && door.frame == 1) 
 		{
 			game.state.start('Stage2');
+			fireWhispers.stop();
 		}
 
 		
@@ -340,6 +368,7 @@ Stage2.prototype = {
 		//Restart the stage
     	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
     		game.state.start('Stage2');
+    		fireWhispers.stop();
     	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		var hitPlatform3 = game.physics.arcade.collide(weight, platforms); // Apply colliding physics between weight and platforms
@@ -364,6 +393,7 @@ Stage2.prototype = {
 			door.frame = 1; // Change door sprite into "open" frame. You win!
 			unlock.play();
 			fwoosh.play();
+			fireWhispers.play();
 	    }
 		
 		//HOLDING THE "WEIGHT" USING DOORCHECK
@@ -397,6 +427,7 @@ Stage2.prototype = {
 		if(checkOverlap(player, door) && door.frame == 1) 
 		{
 			game.state.start('Stage3');
+			fireWhispers.stop();
 		}
 
 		
@@ -510,6 +541,7 @@ Stage3.prototype = {
 		//Restart the stage
     	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
     		game.state.start('Stage3');
+    		fireWhispers.stop();
     	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		var hitPlatform3 = game.physics.arcade.collide(weight, platforms); // Apply colliding physics between weight and platforms
@@ -533,7 +565,7 @@ Stage3.prototype = {
 			door.frame = 1; // Change door sprite into "open" frame. You win!
 			unlock.play();
 			fwoosh.play();
-
+			fireWhispers.play();
 	    }
 		
 		//HOLDING THE "WEIGHT" USING DOORCHECK
@@ -567,6 +599,7 @@ Stage3.prototype = {
 		if(checkOverlap(player, door) && door.frame == 1) 
 		{
 			game.state.start('Stage4');
+			fireWhispers.stop();
 		}
 
 
@@ -685,6 +718,7 @@ Stage4.prototype = {
 		//Restart the stage
     	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
     		game.state.start('Stage4');
+    		fireWhispers.stop();
     	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		var hitPlatform3 = game.physics.arcade.collide(weight, platforms); // Apply colliding physics between weight and platforms
@@ -706,6 +740,8 @@ Stage4.prototype = {
 			flick.animations.play('alight', 10, true);
 			door.frame = 1; // Change door sprite into "open" frame. You win!
 			unlock.play();
+			fwoosh.play();
+			fireWhispers.play();
 	    }
 		
 		//HOLDING THE "WEIGHT" USING DOORCHECK
@@ -739,6 +775,7 @@ Stage4.prototype = {
 		if(checkOverlap(player, door) && door.frame == 1) 
 		{
 			game.state.start('Stage5');
+			fireWhispers.stop();
 		}
 
 
@@ -837,6 +874,7 @@ Stage5.prototype = {
 		//Restart the stage
     	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
     		game.state.start('Stage5');
+    		fireWhispers.stop();
     	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		interactDispenser.alpha = 0;
@@ -855,6 +893,7 @@ Stage5.prototype = {
 					flick.position.y = flick.position.y - 23; //resetting sprite height
 					unlock.play();
 					fwoosh.play();
+					fireWhispers.play();
 				}
 				door.frame = 1;
 			}
@@ -882,6 +921,7 @@ Stage5.prototype = {
 
 		if(checkOverlap(player, door) && door.frame == 1){
 			game.state.start('Stage6');
+			fireWhispers.stop();
 		}
 		
 		//DARKNESS STUFF
@@ -1025,6 +1065,7 @@ Stage6.prototype = {
 		//Restart the stage
     	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
     		game.state.start('Stage6');
+    		fireWhispers.stop();
     	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		hitPlatform = game.physics.arcade.collide(match, platforms);
@@ -1056,6 +1097,7 @@ Stage6.prototype = {
 				flick.position.y = flick.position.y - 23; //resetting sprite height
 				unlock.play();
 				fwoosh.play();
+				fireWhispers.play();
 				doorCheck = true;
 			}
 			door.frame = 1;
@@ -1063,6 +1105,7 @@ Stage6.prototype = {
 
 		if(checkOverlap(player, door) && door.frame == 1) {
 			game.state.start('Stage7');
+			fireWhispers.stop();
 		}
 
 		//DARKNESS STUFF
@@ -1166,6 +1209,7 @@ Stage7.prototype = {
 		//Restart the stage
     	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
     		game.state.start('Stage7');
+    		fireWhispers.stop();
     	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		hitPlatform = game.physics.arcade.collide(rockOne, platforms);
@@ -1208,6 +1252,7 @@ Stage7.prototype = {
 							flick.position.y = flick.position.y - 23; //resetting sprite height
 							unlock.play();
 							fwoosh.play();
+							fireWhispers.play();
 						}
 					door.frame = 1;
 					doorCheck = true;
@@ -1219,6 +1264,7 @@ Stage7.prototype = {
 		//If the doorframe is correct and the player overlaps it, leave
 		if(checkOverlap(player, door) && door.frame == 1) {
 			game.state.start('Stage8');
+			fireWhispers.stop();
 		}
 	
 		//DARKNESS STUFF
@@ -1340,6 +1386,12 @@ Stage8.prototype = {
 	},
 
 	update: function() {
+		//Restart the stage
+    	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
+    		game.state.start('Stage8');
+    		fireWhispers.stop();
+    	}
+
 		var hitPlatform = game.physics.arcade.collide(player, platforms); // Apply colliding physics between player and platforms
 		hitPlatform = game.physics.arcade.collide(match, platforms);
 		interact.alpha = 0;
@@ -1366,12 +1418,14 @@ Stage8.prototype = {
 				unlock.play();
 				fwoosh.play();
 				doorCheck = true;
+				fireWhispers.play();
 			}
 			door.frame = 1;
 		}
 
 		if(checkOverlap(player, door) && door.frame == 1) {
 			game.state.start('Stage9');
+			fireWhispers.stop();
 		}
 
 		//DARKNESS STUFF
@@ -1504,10 +1558,10 @@ Stage9.prototype = {
 		interactThree.scale.setTo(0.5, 0.5);
 
 		//candle for a bit of foreshadowing
-		flick = game.add.sprite(760, 300, 'atlasTwo', 'unlit-candle'); // Add interactable obj
-		flick.animations.add('alight', Phaser.Animation.generateFrameNames('litcandle-', 0, 5, '', 2));
-		flick.animations.play('alight', 10, true);
-		flick.scale.setTo(0.5, 0.5);
+		flicker = game.add.sprite(760, 300, 'atlasTwo', 'unlit-candle'); // Add interactable obj
+		flicker.animations.add('alight', Phaser.Animation.generateFrameNames('litcandle-', 0, 5, '', 2));
+		flicker.animations.play('alight', 10, true);
+		flicker.scale.setTo(0.5, 0.5);
 
 		//INITIALIZING DARKNESS STUFF
 		dots = game.add.group();
@@ -1521,6 +1575,7 @@ Stage9.prototype = {
 		//Restart the stage
     	if(game.input.keyboard.justPressed(Phaser.Keyboard.ENTER)) {
     		game.state.start('Stage9');
+    		fireWhispers.stop();
     	}
 		var hitPlatform = game.physics.arcade.collide(player, platforms);
 		hitPlatform = game.physics.arcade.collide(rockOne, platforms);
@@ -1596,6 +1651,7 @@ Stage9.prototype = {
 					flick.position.y = flick.position.y - 23; //resetting sprite height
 					unlock.play();
 					fwoosh.play();
+					fireWhispers.play();
 				}
 			door.frame = 1;
 			doorCheck = true;
@@ -1604,15 +1660,16 @@ Stage9.prototype = {
 
 		if(checkOverlap(player, door) && door.frame == 1) {
 			game.state.start('StageEnd');
+			fireWhispers.stop();
 		}
 
 		//DARKNESS STUFF
 		echoDark(); //enabling echolocation ability
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
-		erase(darkArray, flick.position.x + 15, flick.position.y + 15, 3, -1);
+		erase(darkArray, flicker.position.x + 15, flicker.position.y + 15, 3, -1);
 		if(door.frame == 1) {
-			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
+			erase(darkArray, flick.position.x, flick.position.y - 25, 7, -1);
 		}
 		if(this.matchOn) {
 			erase(darkArray, match.position.x + 10, match.position.y + 15, 2, -1);
