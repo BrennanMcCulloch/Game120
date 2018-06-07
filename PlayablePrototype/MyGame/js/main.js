@@ -82,7 +82,7 @@ Preloading.prototype = {
 		whispers.volume = 0.5;
 		whispers.loop = true;
 
-		game.state.start('Stage9');
+		game.state.start('MainMenu');
 	}
 
 }
