@@ -42,6 +42,7 @@ Preloading.prototype = {
 
         //ATLASES
         game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
+        game.load.atlas('atlasTwo', 'assets/img/assets2.png', 'assets/img/assets2.json');
 
         //ENCVIRONMENTAL ASSETS
         game.load.image('title', 'assets/img/title.png');
@@ -93,6 +94,11 @@ MainMenu.prototype = {
 		fireWhispers.volume = 0.3;
 		fireWhispers.loop = true;
 		fireWhispers.play();
+
+		flick = game.add.sprite(305, 225, 'atlasTwo', 'fire-00'); // Add interactable obj
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-', 0, 5, '', 2));
+		flick.animations.play('alight', 10, true);
+		flick.scale.setTo(0.75, 0.75);
 
 		//credits text
 		this.MainMenuText = game.add.text(5, 325, credits, style);
@@ -426,6 +432,7 @@ Stage3.prototype = {
 		unlock = game.add.audio('unlock');
 		echoSound = game.add.audio('echoSound');
 		echoFill = game.add.audio('echoFill');
+		fwoosh = game.add.audio('fwoosh');
 		
 		game.add.image(0, 0, 'sky'); // A simple background for our game
 		game.physics.startSystem(Phaser.Physics.ARCADE); // We're going to be using physics, so enable the Arcade Physics system
@@ -453,11 +460,16 @@ Stage3.prototype = {
 		ledge.body.immovable = true;
 		ledge = platforms.create(355, game.world.height/2 - 100, 'wall'); // gate 1 bottom
 		ledge.body.immovable = true;
+		ledge.scale.setTo(1, 0.45);
 		ledge = platforms.create(445, game.world.height/2 - 100, 'wall'); // gate 2 bottom
 		ledge.body.immovable = true;
+		ledge.scale.setTo(1, 0.45);
 
 		//IN THIS INSTANCE, THE PLACE YOU NEED TO BRING THE DIAMOND
-		flick = game.add.sprite(game.world.width/2 + 14, game.world.height/2 + 200, 'second');
+		flick = game.add.sprite(game.world.width/2 + 14, game.world.height/2 + 225, 'atlasTwo', 'car');
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('carfire-', 0, 3, '', 2));
+
 		//game.world.width/2, game.world.height/2 + 100
 		//DOOR YOU CAN USE TO LEAVE
 		door = game.add.sprite(game.world.width - 60, 140, 'door') // Add door
@@ -466,7 +478,10 @@ Stage3.prototype = {
 		door.frame = 0; // Closed door frame
 		doorCheck = false; //IN THIS STAGE, haven't picked up the weight yet
 		
-		weight =  game.add.sprite(game.world.width/2 + 14, 128, 'diamond'); // Add weight
+		weight =  game.add.sprite(game.world.width/2 + 40, 128, 'atlasTwo', 'molotov-00'); // Add weight
+		weight.animations.add('alight', Phaser.Animation.generateFrameNames('molotov-', 0, 9, '', 2));
+		weight.animations.play('alight', 10, true);
+		weight.scale.setTo(0.5, 0.5);
 		game.physics.arcade.enable(weight); // Apply physics on weight?
 	    weight.body.collideWorldBounds = true;
 		weight.body.bounce.set(0.8);
@@ -513,15 +528,18 @@ Stage3.prototype = {
 		if (checkOverlap(weight, flick) && door.frame != 1) // When the weight and the destination overlap
 	    {
 			weight.kill(); // Removes the star from the screen
-			flick.kill();
+			flick.position.y = flick.position.y - 10;
+			flick.animations.play('alight', 10, true);
 			door.frame = 1; // Change door sprite into "open" frame. You win!
 			unlock.play();
+			fwoosh.play();
+
 	    }
 		
 		//HOLDING THE "WEIGHT" USING DOORCHECK
 		if(doorCheck == true) {
 			weight.position.x = player.position.x + 30;
-			weight.position.y = player.position.y;
+			weight.position.y = player.position.y - 20;
 		}
 		if(doorCheck == true && game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
 			doorCheck = false;
@@ -556,6 +574,15 @@ Stage3.prototype = {
 		echoDark(); //enabling echolocation ability
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		if(door.frame) {
+			//light the car on fire\
+			erase(darkArray, flick.position.x - 40, flick.position.y - 10, 7, -1);
+			erase(darkArray, flick.position.x + 40, flick.position.y - 10, 7, -1);
+		}
+		else {
+			//light the bottle on fire
+			erase(darkArray, weight.position.x + 10, weight.position.y + 25, 4, -1);
+		}
 	},
 
 	render: function() {
@@ -614,7 +641,10 @@ Stage4.prototype = {
 		ledge.body.immovable = true;
 
 		//IN THIS INSTANCE, THE PLACE YOU NEED TO BRING THE DIAMOND
-		flick = game.add.sprite(game.world.width/2 + 100, game.world.height/2 + 200, 'second');
+		flick = game.add.sprite(game.world.width/2 + 100, game.world.height/2 + 200, 'atlas', 'sticks');
+		flick.scale.setTo(0.3, 0.3);
+		flick.anchor.setTo(0.5, 0.5);
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('fire-log-', 0, 5, '', 2));
 		//game.world.width/2, game.world.height/2 + 100
 		//DOOR YOU CAN USE TO LEAVE
 		door = game.add.sprite(game.world.width - 60, game.world.height/2 + 210, 'door') // Add door
@@ -623,7 +653,10 @@ Stage4.prototype = {
 		door.frame = 0; // Closed door frame
 		doorCheck = false; //IN THIS STAGE, haven't picked up the weight yet
 		
-		weight =  game.add.sprite(400, 128, 'diamond'); // Add weight
+		weight =  game.add.sprite(400, 128, 'atlasTwo', 'flare-00'); // Add weight
+		weight.animations.add('alight', Phaser.Animation.generateFrameNames('flare-', 0, 5, '', 2));
+		weight.animations.play('alight', 10, true);
+		weight.scale.setTo(0.75, 0.75);
 		game.physics.arcade.enable(weight); // Apply physics on weight?
 	    weight.body.collideWorldBounds = true;
 		weight.body.bounce.set(0.8);
@@ -670,7 +703,7 @@ Stage4.prototype = {
 		if (checkOverlap(weight, flick) && door.frame != 1) // When the weight and the destination overlap
 	    {
 			weight.kill(); // Removes the star from the screen
-			flick.kill();
+			flick.animations.play('alight', 10, true);
 			door.frame = 1; // Change door sprite into "open" frame. You win!
 			unlock.play();
 	    }
@@ -713,6 +746,12 @@ Stage4.prototype = {
 		echoDark(); //enabling echolocation ability
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		if(door.frame) {
+			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
+		}
+		else {
+			erase(darkArray, weight.position.x + 70, weight.position.y, 4, -1);
+		}
 	},
 
 	render: function() {
@@ -769,7 +808,7 @@ Stage5.prototype = {
 		door.frame = 0;
 
 		//THROWABLE DISPENSER
-		dispenser = game.add.sprite(100, 500, 'atlas', 'gascan');
+		dispenser = game.add.sprite(100, 500, 'atlasTwo', 'matchbox');
 
 		makePlayer();
 
@@ -779,11 +818,11 @@ Stage5.prototype = {
 		interact = game.add.sprite(800, 600, 'atlas', 'e'); //over the match
 		interact.scale.setTo(0.5, 0.5);
 
-		match = new Throwable(game, 1000, 1000, 'atlas', 'torch', player);
+		match = new Throwable(game, 1000, 1000, 'atlasTwo', 'matches', player);
 		game.add.existing(match);
-		match.scale.setTo(0.25, 0.25);
-		match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
-		match.animations.add('off', ['torch']); //animation of a single sprite. It's off, b. 
+		match.scale.setTo(0.5, 0.5);
+		match.animations.add('alight', Phaser.Animation.generateFrameNames('matchfire-', 0, 5, '', 2));
+		match.animations.add('off', ['matches']); //animation of a single sprite. It's off, b. 
 
 		//INITIALIZING DARKNESS STUFF
 		dots = game.add.group();
@@ -853,7 +892,7 @@ Stage5.prototype = {
 		erase(darkArray, 670, 360, 10, -1); //flick bottom
 		erase(darkArray, 670, 230, 10, -1); //flick top
 		if(doorCheck) {
-			erase(darkArray, match.position.x + 5, match.position.y + 10, 2, -1);
+			erase(darkArray, match.position.x + 40, match.position.y + 10, 2, -1);
 		}
 		if(door.frame == 1) {
 			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
@@ -963,10 +1002,10 @@ Stage6.prototype = {
 		makePlayer();
 
 		//adding in new torch / flare to throw around
-		match = new Throwable(game, 200, 25, 'atlas', 'torch', player);
+		match = new Throwable(game, 200, 25, 'atlasTwo', 'flare-00', player);
 		game.add.existing(match);
-		match.scale.setTo(0.25, 0.25);
-		match.animations.add('alight', Phaser.Animation.generateFrameNames('fire-torch-', 0, 5, '', 2));
+		match.scale.setTo(0.5, 0.5);
+		match.animations.add('alight', Phaser.Animation.generateFrameNames('flare-', 0, 5, '', 2));
 		match.animations.play('alight', 10, true);
 		//Match interact
 		interact = game.add.sprite(match.position.x, match.position.y - 25, 'atlas', 'e'); //over the match
@@ -1034,7 +1073,7 @@ Stage6.prototype = {
 			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
 		}
 		else {
-			erase(darkArray, match.position.x + 10, match.position.y + 15, 2, -1);
+			erase(darkArray, match.position.x + 40, match.position.y + 5, 2, -1);
 		}
 	},
 
@@ -1464,6 +1503,12 @@ Stage9.prototype = {
 		interactThree = game.add.sprite(match.position.x + 10, match.position.y - 20, 'atlas', 'e'); //over the match
 		interactThree.scale.setTo(0.5, 0.5);
 
+		//candle for a bit of foreshadowing
+		flick = game.add.sprite(760, 300, 'atlasTwo', 'unlit-candle'); // Add interactable obj
+		flick.animations.add('alight', Phaser.Animation.generateFrameNames('litcandle-', 0, 5, '', 2));
+		flick.animations.play('alight', 10, true);
+		flick.scale.setTo(0.5, 0.5);
+
 		//INITIALIZING DARKNESS STUFF
 		dots = game.add.group();
 		for(var y = 0; y < game.height / dotWidth; y ++) {
@@ -1565,6 +1610,7 @@ Stage9.prototype = {
 		echoDark(); //enabling echolocation ability
 		//erase around the player character
 		erase(darkArray, player.position.x, player.position.y, 7, -1);
+		erase(darkArray, flick.position.x + 15, flick.position.y + 15, 3, -1);
 		if(door.frame == 1) {
 			erase(darkArray, flick.position.x, flick.position.y - 10, 7, -1);
 		}
