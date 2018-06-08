@@ -5,7 +5,7 @@ var fwoosh, unlock, echoSound, echoFill, lookBack;
 var music, whispers, fireWhispers;
 var keys; //enabling key movement
 var echoAmount = 1; 
-var credits = "Door unlocking: https://www.youtube.com/watch?v=u9y5G7qTTWM\nFire starting: https://www.youtube.com/watch?v=PC8UOakQuWY\nEcholocation: https://www.youtube.com/watch?v=4GPSM8clbE0\nRocks hitting: https://www.youtube.com/watch?v=pcRXp8NN-m8";
+var credits = "Door unlocking: https://www.youtube.com/watch?v=u9y5G7qTTWM\nFire starting: https://www.youtube.com/watch?v=PC8UOakQuWY\nEcholocation: https://www.youtube.com/watch?v=4GPSM8clbE0\nRocks hitting: https://www.youtube.com/watch?v=pcRXp8NN-m8\nMatch Dispenser: https://www.youtube.com/watch?v=hKkUMOLkyrk";
 var style = { font: "10px Papyrus", fill: "#ffffff"};
 //DARKNESS VARIABLES	
 var dots;
@@ -44,7 +44,7 @@ Preloading.prototype = {
         game.load.atlas('atlas', 'assets/img/assets.png', 'assets/img/assets.json');
         game.load.atlas('atlasTwo', 'assets/img/assets2.png', 'assets/img/assets2.json');
 
-        //ENCVIRONMENTAL ASSETS
+        //ENVIRONMENTAL ASSETS
         game.load.image('title', 'assets/img/title.png');
         game.load.image('sky', 'assets/img/sky.png'); // Preload background
         game.load.spritesheet('door', 'assets/img/door.png', 32, 32); // Preload door
@@ -64,6 +64,7 @@ Preloading.prototype = {
 		game.load.audio('echoFill', 'assets/audio/echoFill.mp3');
 		game.load.audio('lookBack', 'assets/audio/lookBack.mp3');
 		game.load.audio('rockHit', 'assets/audio/rockHit.mp3');
+		game.load.audio('dispense', 'assets/audio/Dispense.mp3');
 
 		//TEMP ASSETS
 		game.load.image('diamond', 'assets/img/diamond.png'); // Preload weight
@@ -812,6 +813,8 @@ Stage5.prototype = {
 		unlock = game.add.audio('unlock');
 		echoSound = game.add.audio('echoSound');
 		echoFill = game.add.audio('echoFill');
+		dispense = game.add.audio('dispense');
+		dispense.volume = 0.5;
 		game.add.image(0, 0, 'sky');
 		doorCheck = false; //is the torch on fire?
 		echoAmount = 1; 
@@ -903,6 +906,7 @@ Stage5.prototype = {
 		if(checkOverlap(player, dispenser)) {
 			interactDispenser.alpha = 1; //show e prompt
 			if(game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
+				dispense.play();
 				match.position.x = 250;
 				match.position.y = 500;
 				match.body.velocity.x = 0;
