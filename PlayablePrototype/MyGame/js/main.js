@@ -1,4 +1,4 @@
-//Development Branch
+//Finished!!
 var game = new Phaser.Game(800, 600, Phaser.AUTO); // Creates a 800 x 600 screen in which the game is displayed
 var ledge, platforms, torches, player, door, doorCheck, match, flick;
 var fwoosh, unlock, echoSound, echoFill, lookBack;
