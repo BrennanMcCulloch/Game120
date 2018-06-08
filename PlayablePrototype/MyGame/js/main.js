@@ -1849,6 +1849,10 @@ function playerMovement() {
 	if(game.input.keyboard.justPressed(Phaser.Keyboard.E)) {
 		player.animations.play('grab');
 	}
+
+	if(game.input.keyboard.justPressed(Phaser.Keyboard.Q)) {
+		player.animations.play('echo');
+	}
 }
 //create player
 function makePlayer() {
@@ -1860,6 +1864,7 @@ function makePlayer() {
 	    player.animations.add('float', Phaser.Animation.generateFrameNames('bean-float-', 0, 14, '', 2));
 	    player.animations.add('side', Phaser.Animation.generateFrameNames('bean-side-', 0, 15, '', 2));
 	    player.animations.add('grab', Phaser.Animation.generateFrameNames('touch-', 0, 30, '', 2), 30);
+	    player.animations.add('echo', Phaser.Animation.generateFrameNames('echo-', 0, 12, '', 2), 30);
 	    player.animations.play('float');
 	    keys = game.input.keyboard.createCursorKeys(); //enabling flash game movement
 }
