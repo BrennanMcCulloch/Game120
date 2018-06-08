@@ -1966,8 +1966,8 @@ function echoDark() {
     //echolocation loop uses same erase function, but syncs it with the update loop
     if(echoOn) {
     	erase(darkArray, echoX, echoY, echoRadder, echoRad);
-		echoRadder += 1;
-		echoRad += 1;
+		echoRadder += 0.5;
+		echoRad += 0.5;
     	if(echoX - (echoRad*dotWidth) < 0 && echoX + (echoRad*dotWidth) > game.width && echoY - (echoRad*dotWidth) < 0 && echoY + (echoRad*dotWidth) > game.height) {
     		echoOn = false;
     	}
